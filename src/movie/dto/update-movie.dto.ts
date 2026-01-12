@@ -71,11 +71,14 @@ function IsPasswordValid(validationOptions?: ValidationOptions) {
 export class UpdateMovieDto {
   @IsNotEmpty()
   @IsOptional()
+  @IsString()
   title?: string;
 
+  @IsArray()
   @IsNotEmpty()
+  @IsNumber({}, { each: true })
   @IsOptional()
-  genre?: string;
+  genreIds?: number[];
 
   // null || undefined 일 경우 에러 발생
   // @IsDefined()
@@ -117,9 +120,11 @@ export class UpdateMovieDto {
 
   @IsNotEmpty()
   @IsOptional()
+  @IsString()
   detail?: string;
 
   @IsNotEmpty()
   @IsOptional()
+  @IsNumber()
   directorId?: number;
 }
