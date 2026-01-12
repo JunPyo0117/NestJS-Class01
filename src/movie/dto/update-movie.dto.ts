@@ -114,4 +114,8 @@ export class UpdateMovieDto {
   // })
   // @IsPasswordValid()
   // test: string;
+
+  @IsNotEmpty()
+  @IsOptional()
+  detail?: string;
 }
