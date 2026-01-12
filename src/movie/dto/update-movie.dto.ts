@@ -112,6 +112,6 @@ export class UpdateMovieDto {
   // @Validate(PasswordValidator, {
   //   message: '다른 에러 메시지',
   // })
-  @IsPasswordValid()
-  test: string;
+  // @IsPasswordValid()
+  // test: string;
 }
