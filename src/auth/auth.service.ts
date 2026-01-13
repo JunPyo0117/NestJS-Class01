@@ -1,4 +1,8 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { User, Role } from 'src/user/entities/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
@@ -46,13 +50,13 @@ export class AuthService {
   }
 
   async parseBearerToken(rawToken: string, isRefreshToken: boolean) {
-    const bearerSplit = rawToken.split(' ');
+    const basicSplit = rawToken.split(' ');
 
-    if (bearerSplit.length !== 2) {
+    if (basicSplit.length !== 2) {
       throw new BadRequestException('Invalid token');
     }
 
-    const [bearer, token] = bearerSplit;
+    const [bearer, token] = basicSplit;
 
     if (bearer.toLocaleLowerCase() !== 'bearer') {
       throw new BadRequestException('Invalid token');
@@ -61,17 +65,18 @@ export class AuthService {
     try {
       const payload = await this.jwtService.verifyAsync(token, {
         secret: this.configService.get<string>(
-          envVariableKeys.refreshTokenSecret,
-        )!,
+          isRefreshToken
+            ? envVariableKeys.refreshTokenSecret
+            : envVariableKeys.accessTokenSecret,
+        ),
       });
-
       if (isRefreshToken) {
         if (payload.type !== 'refresh') {
-          throw new BadRequestException('Refresh token is required');
+          throw new BadRequestException('Refresh 토큰을 입력해주세요');
         }
       } else {
         if (payload.type !== 'access') {
-          throw new BadRequestException('Access token is required');
+          throw new BadRequestException('Access 토큰을 입력해주세요');
         }
       }
 

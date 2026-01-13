@@ -8,6 +8,7 @@ import {
   Delete,
   Query,
   ParseIntPipe,
+  Request,
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
@@ -21,7 +22,11 @@ export class MovieController {
   constructor(private readonly movieService: MovieService) {}
 
   @Get()
-  getMovies(@Query('title', MovieTitleValidationPipe) title?: string) {
+  getMovies(
+    @Request() req: any,
+    @Query('title', MovieTitleValidationPipe) title?: string,
+  ) {
+    console.log(req.user);
     // title 쿼리의 타입이 string 타입인지?
     return this.movieService.findAll(title);
   }
