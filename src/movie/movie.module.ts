@@ -9,13 +9,45 @@ import { DirectorModule } from 'src/director/director.module';
 import { Genre } from 'src/genre/entity/genre.entity';
 import { AuthModule } from 'src/auth/auth.module';
 import { CommonModule } from 'src/common/common.module';
+import { MulterModule } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { join } from 'path';
+import { v4 } from 'uuid';
+import { MovieUserLike } from './entity/movie-user-like.entity';
+import { UserModule } from 'src/user/user.module';
+import { User } from 'src/user/entity/user.entity';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Movie, MovieDetail, Director, Genre]),
+    TypeOrmModule.forFeature([
+      Movie,
+      MovieDetail,
+      Director,
+      Genre,
+      User,
+      MovieUserLike,
+    ]),
     DirectorModule,
     AuthModule,
     CommonModule,
+    UserModule,
+    CacheModule.register(),
+    // MulterModule.register({
+    //   storage: diskStorage({
+    //     destination: join(process.cwd(), 'public', 'movie'),
+    //     filename: (req, file, callback) => {
+    //       const split = file.originalname.split('.');
+    //       let extension = 'mp4';
+
+    //       if (split.length > 1) {
+    //         extension = split[split.length - 1];
+    //       }
+
+    //       callback(null, `${v4()}_${Date.now()}.${extension}`);
+    //     },
+    //   }),
+    // }),
   ],
   controllers: [MovieController],
   providers: [MovieService],
