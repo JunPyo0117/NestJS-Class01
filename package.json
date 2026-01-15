@@ -28,6 +28,7 @@
     "@nestjs/passport": "^11.0.5",
     "@nestjs/platform-express": "^11.0.1",
     "@nestjs/typeorm": "^11.0.0",
+    "@types/multer": "^2.0.0",
     "@types/passport-local": "^1.0.38",
     "bcrypt": "^6.0.0",
     "class-transformer": "^0.5.1",

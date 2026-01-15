@@ -3,7 +3,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User, Role } from 'src/user/entities/user.entity';
+import { User, Role } from 'src/user/entity/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';

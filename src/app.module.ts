@@ -17,11 +17,15 @@ import { GenreModule } from './genre/genre.module';
 import { Genre } from './genre/entity/genre.entity';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
-import { User } from './user/entities/user.entity';
+import { User } from './user/entity/user.entity';
 import { envVariableKeys } from './common/const/env.const';
 import { BearerTokenMiddleware } from './auth/middleware/bearer-token.middleware';
 import { AuthGuard } from './auth/guard/auth.guard';
-import { APP_GUARD } from '@nestjs/core';
+import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
+import { RBACGuard } from './auth/guard/rbac.guard';
+import { ResponseTimeInterceptor } from './common/interceptor/response-time.imterceptor';
+import { ForbiddenExceptionFilter } from './common/filter/forbidden.filter';
+import { QueryFailedFilter } from './common/filter/query-failed.filter';
 
 @Module({
   imports: [
@@ -63,6 +67,22 @@ import { APP_GUARD } from '@nestjs/core';
     {
       provide: APP_GUARD,
       useClass: AuthGuard,
+    },
+    {
+      provide: APP_GUARD,
+      useClass: RBACGuard,
+    },
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: ResponseTimeInterceptor,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: ForbiddenExceptionFilter,
+    },
+    {
+      provide: APP_FILTER,
+      useClass: QueryFailedFilter,
     },
   ],
 })

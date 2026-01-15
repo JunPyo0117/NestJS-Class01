@@ -8,12 +8,14 @@ import { Director } from 'src/director/entity/director.entity';
 import { DirectorModule } from 'src/director/director.module';
 import { Genre } from 'src/genre/entity/genre.entity';
 import { AuthModule } from 'src/auth/auth.module';
+import { CommonModule } from 'src/common/common.module';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Movie, MovieDetail, Director, Genre]),
     DirectorModule,
     AuthModule,
+    CommonModule,
   ],
   controllers: [MovieController],
   providers: [MovieService],
