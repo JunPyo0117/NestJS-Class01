@@ -32,6 +32,12 @@ import { MovieFilePipe } from './pipe/movie-file.pipe';
 import { UserId } from 'src/user/decorator/user-id.decorator';
 import type { QueryRunner as QR } from 'typeorm';
 import { QueryRunner } from 'src/common/decorator/query-runner.decorator';
+import {
+  CacheInterceptor as CI,
+  CacheKey,
+  CacheTTL,
+} from '@nestjs/cache-manager';
+import { Throttle } from 'src/common/decorator/throttle.decorator';
 
 @Controller('movie')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -40,12 +46,23 @@ export class MovieController {
 
   @Get()
   @Public()
+  @Throttle({ count: 5, unit: 'minute', ttl: 60000 })
   // @UseInterceptors(CacheInterceptor) // 캐시 확인용
   getMovies(@Query() dto: GetMoviesDto, @UserId() UserId?: number) {
     // title 쿼리의 타입이 string 타입인지? n
     return this.movieService.findAll(dto, UserId);
   }
 
+  // /movie/recent
+  @Get('recent')
+  @UseInterceptors(CI)
+  @CacheKey('getMoviesRecent')
+  @CacheTTL(3000)
+  getMoviesRecent() {
+    return this.movieService.findRecent();
+  }
+
+  // /movie/asdasd
   @Get(':id')
   @Public()
   getMovie(
