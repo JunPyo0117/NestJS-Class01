@@ -40,8 +40,16 @@ import {
   CacheTTL,
 } from '@nestjs/cache-manager';
 import { Throttle } from 'src/common/decorator/throttle.decorator';
+import {
+  ApiBearerAuth,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
 @Controller('movie')
+@ApiBearerAuth()
+@ApiTags('Movie')
 @UseInterceptors(ClassSerializerInterceptor)
 export class MovieController {
   constructor(private readonly movieService: MovieService) {}
@@ -50,8 +58,14 @@ export class MovieController {
   @Public()
   @Throttle({ count: 5, unit: 'minute', ttl: 60000 })
   // @UseInterceptors(CacheInterceptor) // 캐시 확인용
+  @ApiOperation({ description: '[Movie]를 페이지네이션 하는 API' })
+  @ApiResponse({ status: 200, description: '영화 목록 조회 성공' })
+  @ApiResponse({
+    status: 400,
+    description: '페이지네이션 데이터를 잘못 입력 했을 때',
+  })
   getMovies(@Query() dto: GetMoviesDto, @UserId() UserId?: number) {
-    // title 쿼리의 타입이 string 타입인지? n
+    // title 쿼리의 타입이 string 타입인지?
     return this.movieService.findAll(dto, UserId);
   }
 

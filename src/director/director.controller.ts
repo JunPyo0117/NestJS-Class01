@@ -13,9 +13,12 @@ import {
 import { DirectorService } from './director.service';
 import { CreateDirectorDto } from './dto/create-director.dto';
 import { UpdateDirectorDto } from './dto/update-director.dto';
+import { ApiBearerAuth, ApiTags } from '@nestjs/swagger';
 
 @Controller('director')
+@ApiBearerAuth()
 @UseInterceptors(ClassSerializerInterceptor)
+@ApiTags('Director')
 export class DirectorController {
   constructor(private readonly directorService: DirectorService) {}
 

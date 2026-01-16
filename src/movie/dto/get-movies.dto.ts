@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsOptional, IsString } from 'class-validator';
 import { CursorPaginationDto } from 'src/common/dto/cursor-pagination.dto';
 import { PagePagenationDto as PagePaginationDto } from 'src/common/dto/page-pagination.dto';
@@ -13,5 +14,9 @@ import { PagePagenationDto as PagePaginationDto } from 'src/common/dto/page-pagi
 export class GetMoviesDto extends CursorPaginationDto {
   @IsOptional()
   @IsString()
+  @ApiProperty({
+    description: '영화 제목',
+    example: 'The Dark Knight',
+  })
   title?: string;
 }
