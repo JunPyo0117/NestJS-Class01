@@ -27,6 +27,7 @@ export class CreateMovieDto {
 
   @IsNotEmpty()
   @IsNumber()
+  @Type(() => Number)
   @ApiProperty({
     description: '감독 객체 ID',
     example: 1,
