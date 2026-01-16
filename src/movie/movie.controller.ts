@@ -12,6 +12,8 @@ import {
   UploadedFile,
   UploadedFiles,
   BadGatewayException,
+  Version,
+  VERSION_NEUTRAL,
 } from '@nestjs/common';
 import { MovieService } from './movie.service';
 import { CreateMovieDto } from './dto/create-movie.dto';
