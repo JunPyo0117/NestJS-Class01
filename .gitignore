@@ -57,5 +57,5 @@ pids
 report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 
 # file
-/public/temp
-/public/movie
+/public/temp/*
+/public/movie/*
