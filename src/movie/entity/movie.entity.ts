@@ -42,6 +42,11 @@ export class Movie extends BaseTable {
   })
   likeCount: number;
 
+  @Column({
+    default: 0,
+  })
+  dislikeCount: number;
+
   @OneToOne(() => MovieDetail, (movieDetail) => movieDetail.id, {
     cascade: true,
     nullable: false,

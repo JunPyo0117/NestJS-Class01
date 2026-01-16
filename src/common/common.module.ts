@@ -5,6 +5,9 @@ import { MulterModule } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { join } from 'path';
 import { v4 } from 'uuid';
+import { TaskService } from './task.service';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Movie } from 'src/movie/entity/movie.entity';
 
 @Module({
   imports: [
@@ -23,9 +26,10 @@ import { v4 } from 'uuid';
         },
       }),
     }),
+    TypeOrmModule.forFeature([Movie]),
   ],
   controllers: [CommonController],
-  providers: [CommonService],
-  exports: [CommonService],
+  providers: [CommonService, TaskService],
+  exports: [CommonService, TaskService],
 })
 export class CommonModule {}
