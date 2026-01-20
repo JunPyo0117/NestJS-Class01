@@ -1,19 +1,42 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { User } from './entity/user.entity';
+import * as bcrypt from 'bcrypt';
+import { ConfigService } from '@nestjs/config';
+import { envVariableKeys } from 'src/common/const/env.const';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    private readonly configService: ConfigService,
   ) {}
 
-  create(createUserDto: CreateUserDto) {
-    return this.userRepository.save(createUserDto);
+  async create(createUserDto: CreateUserDto) {
+    const { email, password } = createUserDto;
+
+    const user = await this.userRepository.findOne({ where: { email } });
+
+    if (user) {
+      throw new BadRequestException('User already exists');
+    }
+
+    const hash = await bcrypt.hash(
+      password,
+      this.configService.get<number>(envVariableKeys.hashRounds)!,
+    );
+
+    await this.userRepository.save({ email, password: hash });
+
+    return this.userRepository.findOne({ where: { email } });
   }
 
   findAll() {
@@ -36,7 +59,20 @@ export class UserService {
     if (!user) {
       throw new NotFoundException(`User with ID ${id} not found`);
     }
-    await this.userRepository.update({ id }, updateUserDto);
+
+    const { password, ...rest } = updateUserDto;
+
+    const updateData: Partial<User> = { ...rest };
+
+    if (password) {
+      const hash = await bcrypt.hash(
+        password,
+        this.configService.get<number>(envVariableKeys.hashRounds)!,
+      );
+      updateData.password = hash;
+    }
+
+    await this.userRepository.update({ id }, updateData);
 
     return this.userRepository.findOne({ where: { id } });
   }

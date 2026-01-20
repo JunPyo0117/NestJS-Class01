@@ -1,0 +1,30 @@
+{
+  "moduleFileExtensions": [
+    "js",
+    "json",
+    "ts"
+  ],
+  "roots": [
+    "src"
+  ],
+  "testEnvironment": "node",
+  "testRegex": ".e2e.spec.ts$",
+  "transform": {
+    "^.+\\.(t|j)s$": [
+      "ts-jest",
+      {
+        "tsconfig": {
+          "esModuleInterop": true,
+          "allowSyntheticDefaultImports": true
+        }
+      }
+    ]
+  },
+  "moduleNameMapper": {
+    "^src/(.*)$": "<rootDir>/src/$1",
+    "^uuid$": "<rootDir>/src/__mocks__/uuid.js"
+  },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(@nestjs|uuid|@paralleldrive|cuid2|formidable|superagent|supertest)/)"
+  ]
+}

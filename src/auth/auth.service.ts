@@ -12,6 +12,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { JwtService } from '@nestjs/jwt';
 import { envVariableKeys } from 'src/common/const/env.const';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class AuthService {
@@ -22,6 +23,7 @@ export class AuthService {
     private readonly jwtService: JwtService,
     @Inject(CACHE_MANAGER)
     private readonly cacheManager: Cache,
+    private readonly userService: UserService,
   ) {}
 
   async tokenBlock(token: string) {
@@ -112,20 +114,7 @@ export class AuthService {
   async register(rawToken: string) {
     const { email, password } = this.parseBasicToken(rawToken);
 
-    const user = await this.userRepository.findOne({ where: { email } });
-
-    if (user) {
-      throw new BadRequestException('User already exists');
-    }
-
-    const hash = await bcrypt.hash(
-      password,
-      this.configService.get<number>(envVariableKeys.hashRounds)!,
-    );
-
-    await this.userRepository.save({ email, password: hash });
-
-    return this.userRepository.findOne({ where: { email } });
+    return this.userService.create({ email, password });
   }
 
   async authenticate(email: string, password: string) {
