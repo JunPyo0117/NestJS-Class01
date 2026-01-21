@@ -73,7 +73,7 @@ import * as winston from 'winston';
             : true,
         ...(configService.get<string>(envVariableKeys.env) === 'prod' && {
           ssl: {
-            rejectUnauthorized: false,
+            rejectUnauthorized: true,
           },
         }),
       }),
