@@ -16,11 +16,16 @@ export class QueryFailedFilter implements ExceptionFilter {
       message = '중복된 값이 있습니다!!!';
     }
 
+    // 원인 파악용: 실제 DB 에러 (원인 해결 후 detail 제거 가능)
+    const detail = exception.message;
+    console.error('[QueryFailed]', detail, (exception as any).driverError);
+
     response.status(status).json({
       statusCode: status,
       timestamp: new Date().toISOString(),
       path: request.url,
       message,
+      detail,
     });
   }
 }
