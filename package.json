@@ -36,6 +36,8 @@
     "test:movie-user-like:watch": "jest --watch --testPathPatterns=src/movie-user-like --coverage --collectCoverageFrom=src/movie-user-like/**"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.972.0",
+    "@aws-sdk/s3-request-presigner": "^3.972.0",
     "@nestjs/cache-manager": "^3.1.0",
     "@nestjs/common": "^11.0.1",
     "@nestjs/config": "^4.0.2",
@@ -50,6 +52,7 @@
     "@nestjs/typeorm": "^11.0.0",
     "@types/multer": "^2.0.0",
     "@types/passport-local": "^1.0.38",
+    "aws-sdk": "^2.1693.0",
     "bcrypt": "^6.0.0",
     "cache-manager": "^7.2.8",
     "class-transformer": "^0.5.1",
@@ -83,6 +86,7 @@
     "@types/supertest": "^6.0.2",
     "@types/winston": "^2.4.4",
     "better-sqlite3": "^12.6.2",
+    "dotenv": "^16.6.1",
     "eslint": "^9.18.0",
     "eslint-config-prettier": "^10.0.1",
     "eslint-plugin-jest": "^29.12.1",

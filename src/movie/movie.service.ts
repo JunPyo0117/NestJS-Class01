@@ -23,6 +23,8 @@ import { rename } from 'fs/promises';
 import { User } from 'src/user/entity/user.entity';
 import { MovieUserLike } from './entity/movie-user-like.entity';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
+import { ConfigService } from '@nestjs/config';
+import { envVariableKeys } from 'src/common/const/env.const';
 
 @Injectable()
 export class MovieService {
@@ -43,6 +45,7 @@ export class MovieService {
     private readonly commonService: CommonService,
     @Inject(CACHE_MANAGER)
     private readonly cacheManager: Cache,
+    private readonly configService: ConfigService,
   ) {}
 
   async findRecent() {
@@ -172,7 +175,8 @@ export class MovieService {
     userId: number,
     movieFolder: string,
   ) {
-    return qr.manager.createQueryBuilder()
+    return qr.manager
+      .createQueryBuilder()
       .insert()
       .into(Movie)
       .values({
@@ -186,7 +190,7 @@ export class MovieService {
         },
         movieFilePath: join(movieFolder, createMovieDto.movieFileName),
       })
-      .execute()
+      .execute();
   }
 
   createMovieGenreRelation(qr: QueryRunner, movieId: number, genres: Genre[]) {
@@ -202,10 +206,16 @@ export class MovieService {
     movieFolder: string,
     createMovieDto: CreateMovieDto,
   ) {
-    return rename(
-      join(process.cwd(), tempFolder, createMovieDto.movieFileName),
-      join(process.cwd(), movieFolder, createMovieDto.movieFileName),
-    );
+    if (this.configService.get<string>(envVariableKeys.env) !== 'prod') {
+      return rename(
+        join(process.cwd(), tempFolder, createMovieDto.movieFileName),
+        join(process.cwd(), movieFolder, createMovieDto.movieFileName),
+      );
+    } else {
+      return this.commonService.saveMovieToPermanentStorage(
+        createMovieDto.movieFileName,
+      );
+    }
   }
 
   async create(

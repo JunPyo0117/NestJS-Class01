@@ -13,11 +13,13 @@ import {
   ApiResponse,
   ApiTags,
 } from '@nestjs/swagger';
+import { CommonService } from './common.service';
 
 @Controller('common')
 @ApiBearerAuth()
 @ApiTags('Common')
 export class CommonController {
+  constructor(private readonly commonService: CommonService) {}
   @Post('video')
   @ApiOperation({
     description: '영화 비디오 파일 업로드 (MP4만 가능, 최대 10MB)',
@@ -51,6 +53,13 @@ export class CommonController {
   createVideo(@UploadedFile() movie: Express.Multer.File) {
     return {
       filename: movie.filename,
+    };
+  }
+
+  @Post('presigned-url')
+  async createPresignedUrl() {
+    return {
+      url: await this.commonService.createPresignedUrl(),
     };
   }
 }
