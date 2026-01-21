@@ -101,9 +101,6 @@ jobs:
       - name: Run Tests
         run: npm run test
 
-      - name: Remove node_modules before zip
-        run: rm -rf node_modules
-
       - name: Install TypeORM
         run: npm i -g typeorm
 
