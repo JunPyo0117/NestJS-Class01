@@ -48,5 +48,5 @@ jobs:
             --source-bundle S3Bucket=nestjs-mybucket-3,S3Key=deploy.zip
           aws elasticbeanstalk update-environment \
             --application-name nestjs-myapp \
-            --environment-name nestjs-myenv \
+            --environment-name nestjs-myapp-env \
             --version-label ${{ github.sha }}
