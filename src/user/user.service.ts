@@ -49,12 +49,21 @@ export class UserService {
   }
 
   findAll() {
-    return this.prismaService.user.findMany();
+    return this.prismaService.user.findMany({
+      omit: {
+        password: true,
+      },
+    });
     // return this.userRepository.find();
   }
 
   async findOne(id: number) {
-    const user = await this.prismaService.user.findUnique({ where: { id } });
+    const user = await this.prismaService.user.findUnique({
+      where: { id },
+      omit: {
+        password: true,
+      },
+    });
 
     // const user = await this.userRepository.findOne({ where: { id } });
 
@@ -91,7 +100,12 @@ export class UserService {
 
     // await this.userRepository.update({ id }, updateData);
 
-    return this.prismaService.user.findUnique({ where: { id } });
+    return this.prismaService.user.findUnique({
+      where: { id },
+      omit: {
+        password: true,
+      },
+    });
 
     // return this.userRepository.findOne({ where: { id } });
   }
