@@ -6,7 +6,7 @@ import {
 } from '@nestjs/common';
 import { MovieModule } from './movie/movie.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { ConfigModule } from '@nestjs/config';
+import { ConditionalModule, ConfigModule } from '@nestjs/config';
 import Joi from 'joi';
 import { ConfigService } from '@nestjs/config';
 import { Movie } from './movie/entity/movie.entity';
@@ -37,6 +37,7 @@ import { ChatModule } from './chat/chat.module';
 import * as winston from 'winston';
 import { Chat } from './chat/entity/chat.entity';
 import { ChatRoom } from './chat/entity/chat-room.entity';
+import { WorkerModule } from './worker/worker.module';
 
 @Module({
   imports: [
@@ -51,6 +52,7 @@ import { ChatRoom } from './chat/entity/chat-room.entity';
         DB_USERNAME: Joi.string().required(),
         DB_PASSWORD: Joi.string().required(),
         DB_DATABASE: Joi.string().required(),
+        DB_URL: Joi.string().required(),
         HASH_ROUNDS: Joi.number().required(),
         ACCESS_TOKEN_SECRET: Joi.string().required(),
         REFRESH_TOKEN_SECRET: Joi.string().required(),
@@ -63,12 +65,13 @@ import { ChatRoom } from './chat/entity/chat-room.entity';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
+        url: configService.get<string>(envVariableKeys.dbUrl),
         type: configService.get<string>(envVariableKeys.dbType) as 'postgres',
-        host: configService.get<string>(envVariableKeys.dbHost),
-        port: configService.get<number>(envVariableKeys.dbPort),
-        username: configService.get<string>(envVariableKeys.dbUsername),
-        password: configService.get<string>(envVariableKeys.dbPassword),
-        database: configService.get<string>(envVariableKeys.dbDatabase),
+        // host: configService.get<string>(envVariableKeys.dbHost),
+        // port: configService.get<number>(envVariableKeys.dbPort),
+        // username: configService.get<string>(envVariableKeys.dbUsername),
+        // password: configService.get<string>(envVariableKeys.dbPassword),
+        // database: configService.get<string>(envVariableKeys.dbDatabase),
         entities: [
           Movie,
           MovieDetail,
@@ -135,6 +138,10 @@ import { ChatRoom } from './chat/entity/chat-room.entity';
       ttl: 3000,
     }),
     ChatModule,
+    ConditionalModule.registerWhen(
+      WorkerModule,
+      (env: NodeJS.ProcessEnv) => env['TYPE'] === 'worker',
+    ),
   ],
   providers: [
     {

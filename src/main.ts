@@ -6,6 +6,7 @@ import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as ffmpeg from '@ffmpeg-installer/ffmpeg';
 import * as ffmpegFluent from 'fluent-ffmpeg';
 import * as ffprobe from 'ffprobe-static';
+import session from 'express-session';
 
 ffmpegFluent.setFfmpegPath(ffmpeg.path);
 ffmpegFluent.setFfprobePath(ffprobe.path);
@@ -41,6 +42,15 @@ async function bootstrap() {
       },
     }),
   );
+
+  app.use(
+    session({
+      secret: 'secret',
+      // resave: false, // 변경되지 않으면 저장 안 함
+      // saveUninitialized: false, // 초기화되지 않은 세션 저장 안 함
+    }),
+  );
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();

@@ -4,7 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-import { User, Role } from 'src/user/entity/user.entity';
+// import { User, Role } from 'src/user/entity/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
@@ -13,17 +13,20 @@ import { JwtService } from '@nestjs/jwt';
 import { envVariableKeys } from 'src/common/const/env.const';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { UserService } from 'src/user/user.service';
+import { PrismaService } from 'src/common/prisma.service';
+import { PrismaClient, Role } from '@prisma/client';
 
 @Injectable()
 export class AuthService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
+    // @InjectRepository(User)
+    // private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     @Inject(CACHE_MANAGER)
     private readonly cacheManager: Cache,
     private readonly userService: UserService,
+    private readonly prismaService: PrismaService,
   ) {}
 
   async tokenBlock(token: string) {
@@ -118,7 +121,8 @@ export class AuthService {
   }
 
   async authenticate(email: string, password: string) {
-    const user = await this.userRepository.findOne({ where: { email } });
+    const user = await this.prismaService.user.findUnique({ where: { email } });
+    // const user = await this.userRepository.findOne({ where: { email } });
 
     if (!user) {
       throw new BadRequestException('User not found');

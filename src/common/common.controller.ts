@@ -14,12 +14,18 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { CommonService } from './common.service';
+import { Queue } from 'bullmq';
+import { InjectQueue } from '@nestjs/bullmq';
 
 @Controller('common')
 @ApiBearerAuth()
 @ApiTags('Common')
 export class CommonController {
-  constructor(private readonly commonService: CommonService) {}
+  constructor(
+    private readonly commonService: CommonService,
+    @InjectQueue('thumbnail-generation')
+    private readonly thumbnailQueue: Queue,
+  ) {}
   @Post('video')
   @ApiOperation({
     description: '영화 비디오 파일 업로드 (MP4만 가능, 최대 10MB)',
@@ -50,7 +56,23 @@ export class CommonController {
       },
     }),
   )
-  createVideo(@UploadedFile() movie: Express.Multer.File) {
+  async createVideo(@UploadedFile() movie: Express.Multer.File) {
+    await this.thumbnailQueue.add(
+      'thumbnail',
+      {
+        videoId: movie.filename,
+        videoPath: movie.path,
+      },
+      // {
+      //   priority: 1,
+      //   delay: 100,
+      //   attempts: 3,
+      //   lifo: true,
+      //   removeOnComplete: true,
+      //   removeOnFail: true,
+      // },
+    );
+
     return {
       filename: movie.filename,
     };
