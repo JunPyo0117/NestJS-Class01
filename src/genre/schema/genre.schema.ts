@@ -24,3 +24,10 @@ export class Genre extends Document {
 }
 
 export const GenreSchema = SchemaFactory.createForClass(Genre);
+
+// GenreSchema.set('toObject', {
+//   transform: (model, ret: any) => {
+//     ret._id = ret._id.toString();
+//     return ret;
+//   },
+// });

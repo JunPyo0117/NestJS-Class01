@@ -23,7 +23,7 @@ import {
 @Controller('genre')
 @ApiBearerAuth()
 @ApiTags('Genre')
-@UseInterceptors(ClassSerializerInterceptor)
+// @UseInterceptors(ClassSerializerInterceptor)
 export class GenreController {
   constructor(private readonly genreService: GenreService) {}
 
@@ -49,8 +49,10 @@ export class GenreController {
   @ApiResponse({ status: 200, description: '장르 정보 조회 성공' })
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
   @ApiResponse({ status: 404, description: '장르를 찾을 수 없음' })
-  findOne(@Param('id', ParseIntPipe) id: string) {
-    return this.genreService.findOne(+id);
+  // findOne(@Param('id', ParseIntPipe) id: string) {
+  findOne(@Param('id') id: string) {
+    // return this.genreService.findOne(+id);
+    return this.genreService.findOne(id);
   }
 
   @Patch(':id')
@@ -59,11 +61,13 @@ export class GenreController {
   @ApiResponse({ status: 400, description: '잘못된 요청 데이터' })
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
   @ApiResponse({ status: 404, description: '장르를 찾을 수 없음' })
-  update(
-    @Param('id', ParseIntPipe) id: string,
-    @Body() updateGenreDto: UpdateGenreDto,
-  ) {
-    return this.genreService.update(+id, updateGenreDto);
+  // update(
+  //   @Param('id', ParseIntPipe) id: string,
+  //   @Body() updateGenreDto: UpdateGenreDto,
+  // ) {
+  update(@Param('id') id: string, @Body() updateGenreDto: UpdateGenreDto) {
+    // return this.genreService.update(+id, updateGenreDto);
+    return this.genreService.update(id, updateGenreDto);
   }
 
   @Delete(':id')
@@ -71,7 +75,9 @@ export class GenreController {
   @ApiResponse({ status: 200, description: '장르 삭제 성공' })
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
   @ApiResponse({ status: 404, description: '장르를 찾을 수 없음' })
-  remove(@Param('id', ParseIntPipe) id: string) {
-    return this.genreService.remove(+id);
+  // remove(@Param('id', ParseIntPipe) id: string) {
+  remove(@Param('id') id: string) {
+    // return this.genreService.remove(+id);
+    return this.genreService.remove(id);
   }
 }

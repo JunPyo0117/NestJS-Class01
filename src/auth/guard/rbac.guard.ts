@@ -1,8 +1,14 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  ForbiddenException,
+} from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { Reflector } from '@nestjs/core';
 import { RBAC } from '../decorator/rbac.decorator';
-import { Role } from 'src/user/entity/user.entity';
+// import { Role } from 'src/user/entity/user.entity';
+import { Role } from '@prisma/client';
 
 @Injectable()
 export class RBACGuard implements CanActivate {
@@ -23,9 +29,33 @@ export class RBACGuard implements CanActivate {
     const user = request.user;
 
     if (!user) {
-      return false;
+      throw new ForbiddenException('사용자 정보를 찾을 수 없습니다.');
     }
 
-    return user.role <= rbac;
+    if (!user.role) {
+      throw new ForbiddenException('사용자 권한 정보가 없습니다.');
+    }
+
+    const roleAccessLevel = {
+      [Role.admin]: 0,
+      [Role.paidUser]: 1,
+      [Role.user]: 2,
+    };
+
+    const userLevel = roleAccessLevel[user.role];
+    const requiredLevel = roleAccessLevel[rbac];
+
+    if (userLevel === undefined) {
+      throw new ForbiddenException(`유효하지 않은 사용자 권한: ${user.role}`);
+    }
+
+    if (userLevel > requiredLevel) {
+      throw new ForbiddenException(
+        `권한이 부족합니다. 필요한 권한: ${rbac}, 현재 권한: ${user.role}`,
+      );
+    }
+
+    // return user.role <= rbac;
+    return roleAccessLevel[user.role] <= roleAccessLevel[rbac];
   }
 }

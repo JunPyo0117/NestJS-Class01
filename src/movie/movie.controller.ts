@@ -39,7 +39,7 @@ import {
 @Controller('movie')
 @ApiBearerAuth()
 @ApiTags('Movie')
-@UseInterceptors(ClassSerializerInterceptor)
+// @UseInterceptors(ClassSerializerInterceptor)
 export class MovieController {
   constructor(private readonly movieService: MovieService) {}
 
@@ -53,7 +53,8 @@ export class MovieController {
     status: 400,
     description: '페이지네이션 데이터를 잘못 입력 했을 때',
   })
-  getMovies(@Query() dto: GetMoviesDto, @UserId() UserId?: number) {
+  // getMovies(@Query() dto: GetMoviesDto, @UserId() UserId?: string) {
+  getMovies(@Query() dto: GetMoviesDto, @UserId() UserId?: string) {
     // title 쿼리의 타입이 string 타입인지?
     return this.movieService.findAll(dto, UserId);
   }
@@ -76,8 +77,9 @@ export class MovieController {
   @ApiResponse({ status: 200, description: '영화 상세 정보 조회 성공' })
   @ApiResponse({ status: 404, description: '영화를 찾을 수 없음' })
   getMovie(
-    @Param('id', ParseIntPipe)
-    id: number,
+    // @Param('id', ParseIntPipe)
+    // id: number,
+    @Param('id') id: string,
     @Req() request: any,
   ) {
     const session = request.session;
@@ -91,6 +93,7 @@ export class MovieController {
 
     console.log(session);
 
+    // return this.movieService.findOne(+id);
     return this.movieService.findOne(id);
   }
 
@@ -105,7 +108,8 @@ export class MovieController {
   createMovie(
     @Body() body: CreateMovieDto,
     // @QueryRunner() queryRunner: QR,
-    @UserId() userId: number,
+    // @UserId() userId: number,
+    @UserId() userId: string,
   ) {
     return this.movieService.create(
       body,
@@ -123,10 +127,12 @@ export class MovieController {
   @ApiResponse({ status: 403, description: '관리자 권한 필요' })
   @ApiResponse({ status: 404, description: '영화를 찾을 수 없음' })
   updateMovie(
-    @Param('id', ParseIntPipe) id: string,
+    // @Param('id', ParseIntPipe) id: string,
+    @Param('id') id: string,
     @Body() body: UpdateMovieDto,
   ) {
-    return this.movieService.update(+id, body);
+    // return this.movieService.update(+id, body);
+    return this.movieService.update(id, body);
   }
 
   @Delete(':id')
@@ -136,8 +142,10 @@ export class MovieController {
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
   @ApiResponse({ status: 403, description: '관리자 권한 필요' })
   @ApiResponse({ status: 404, description: '영화를 찾을 수 없음' })
-  deleteMovie(@Param('id', ParseIntPipe) id: string) {
-    return this.movieService.remove(+id);
+  // deleteMovie(@Param('id', ParseIntPipe) id: string) {
+  deleteMovie(@Param('id') id: string) {
+    // return this.movieService.remove(+id);
+    return this.movieService.remove(id);
   }
 
   @Post(':id/like')
@@ -146,8 +154,10 @@ export class MovieController {
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
   @ApiResponse({ status: 404, description: '영화를 찾을 수 없음' })
   createMovieLike(
-    @Param('id', ParseIntPipe) movieId: number,
-    @UserId() userId: number,
+    // @Param('id', ParseIntPipe) movieId: number,
+    @Param('id') movieId: string,
+    // @UserId() userId: number,
+    @UserId() userId: string,
   ) {
     return this.movieService.toggleMovieLike(movieId, userId, true);
   }
@@ -158,8 +168,10 @@ export class MovieController {
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
   @ApiResponse({ status: 404, description: '영화를 찾을 수 없음' })
   createMovieDislike(
-    @Param('id', ParseIntPipe) movieId: number,
-    @UserId() userId: number,
+    // @Param('id', ParseIntPipe) movieId: number,
+    @Param('id') movieId: string,
+    // @UserId() userId: string,
+    @UserId() userId: string,
   ) {
     return this.movieService.toggleMovieLike(movieId, userId, false);
   }
