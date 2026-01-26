@@ -38,6 +38,7 @@ import * as winston from 'winston';
 import { Chat } from './chat/entity/chat.entity';
 import { ChatRoom } from './chat/entity/chat-room.entity';
 import { WorkerModule } from './worker/worker.module';
+import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
@@ -62,6 +63,9 @@ import { WorkerModule } from './worker/worker.module';
         BUCKET_NAME: Joi.string().required(),
       }),
     }),
+    MongooseModule.forRoot(
+      'mongodb+srv://test:test@nestjsmongo.chgdpff.mongodb.net/?appName=NestJSMongo',
+    ),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({

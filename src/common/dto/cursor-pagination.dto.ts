@@ -32,5 +32,5 @@ export class CursorPaginationDto {
     description: '페이지네이션 페이지 당 아이템 수',
     example: 5,
   })
-  take: number = 5;
+  take: number = 2;
 }

@@ -16,7 +16,8 @@ import { UpdateMovieDto } from './dto/update-movie.dto';
 import { ClassSerializerInterceptor, UseInterceptors } from '@nestjs/common';
 import { Public } from 'src/auth/decorator/public.decorator';
 import { RBAC } from 'src/auth/decorator/rbac.decorator';
-import { Role } from 'src/user/entity/user.entity';
+// import { Role } from 'src/user/entity/user.entity';
+import { Role } from '@prisma/client';
 import { GetMoviesDto } from './dto/get-movies.dto';
 import { TransactionInterceptor } from 'src/common/interceptor/transaction.interceptor';
 import { UserId } from 'src/user/decorator/user-id.decorator';
@@ -95,7 +96,7 @@ export class MovieController {
 
   @Post()
   @RBAC(Role.admin)
-  @UseInterceptors(TransactionInterceptor)
+  // @UseInterceptors(TransactionInterceptor)
   @ApiOperation({ description: '새로운 영화 생성 (관리자 권한 필요)' })
   @ApiResponse({ status: 201, description: '영화 생성 성공' })
   @ApiResponse({ status: 400, description: '잘못된 요청 데이터' })
@@ -103,10 +104,14 @@ export class MovieController {
   @ApiResponse({ status: 403, description: '관리자 권한 필요' })
   createMovie(
     @Body() body: CreateMovieDto,
-    @QueryRunner() queryRunner: QR,
+    // @QueryRunner() queryRunner: QR,
     @UserId() userId: number,
   ) {
-    return this.movieService.create(body, queryRunner, userId);
+    return this.movieService.create(
+      body,
+      // queryRunner,
+      userId,
+    );
   }
 
   @Patch(':id')
