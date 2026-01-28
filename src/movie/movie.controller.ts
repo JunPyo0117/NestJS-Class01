@@ -56,7 +56,7 @@ export class MovieController {
   // getMovies(@Query() dto: GetMoviesDto, @UserId() UserId?: string) {
   getMovies(@Query() dto: GetMoviesDto, @UserId() UserId?: string) {
     // title 쿼리의 타입이 string 타입인지?
-    return this.movieService.findAll(dto, UserId);
+    return this.movieService.findAll(dto, UserId ? +UserId : undefined);
   }
 
   // /movie/recent
