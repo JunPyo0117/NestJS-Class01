@@ -26,29 +26,29 @@ export class CreateMovieDto {
   detail: string;
 
   @IsNotEmpty()
-  // @IsNumber()
-  @IsString()
-  // @Type(() => Number)
-  @Type(() => String)
+  @IsNumber()
+  // @IsString()
+  @Type(() => Number)
+  // @Type(() => String)
   @ApiProperty({
     description: '감독 객체 ID',
     example: 1,
   })
-  // directorId: number;
-  directorId: string;
+  directorId: number;
+  // directorId: string;
 
-  // @IsArray()
-  @IsString({ each: true })
+  @IsArray()
+  // @IsString({ each: true })
   @ArrayNotEmpty()
-  // @IsNumber({}, { each: true })
-  // @Type(() => Number)
-  @Type(() => String)
+  @IsNumber({}, { each: true })
+  @Type(() => Number)
+  // @Type(() => String)
   @ApiProperty({
     description: '장르 객체 ID 배열',
     example: [1, 2, 3],
   })
-  // genreIds: number[];
-  genreIds: string[];
+  genreIds: number[];
+  // genreIds: string[];
 
   @IsString()
   @ApiProperty({

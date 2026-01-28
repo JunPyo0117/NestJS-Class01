@@ -40,10 +40,10 @@ export class DirectorController {
   @ApiResponse({ status: 200, description: '감독 정보 조회 성공' })
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
   @ApiResponse({ status: 404, description: '감독을 찾을 수 없음' })
-  // findOne(@Param('id', ParseIntPipe) id: string) {
-  findOne(@Param('id') id: string) {
-    // return this.directorService.findOne(+id);
+  findOne(@Param('id', ParseIntPipe) id: number) {
+    // findOne(@Param('id') id: string) {
     return this.directorService.findOne(id);
+    // return this.directorService.findOne(id);
   }
 
   @Post()
@@ -61,16 +61,16 @@ export class DirectorController {
   @ApiResponse({ status: 400, description: '잘못된 요청 데이터' })
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
   @ApiResponse({ status: 404, description: '감독을 찾을 수 없음' })
-  // update(
-  //   @Param('id', ParseIntPipe) id: string,
-  //   @Body() updateDirectorDto: UpdateDirectorDto,
-  // ) {
   update(
-    @Param('id') id: string,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updateDirectorDto: UpdateDirectorDto,
   ) {
-    // return this.directorService.update(+id, updateDirectorDto);
+    // update(
+    //   @Param('id') id: string,
+    //   @Body() updateDirectorDto: UpdateDirectorDto,
+    // ) {
     return this.directorService.update(id, updateDirectorDto);
+    // return this.directorService.update(id, updateDirectorDto);
   }
 
   @Delete(':id')
@@ -78,9 +78,9 @@ export class DirectorController {
   @ApiResponse({ status: 200, description: '감독 삭제 성공' })
   @ApiResponse({ status: 401, description: '인증되지 않은 사용자' })
   @ApiResponse({ status: 404, description: '감독을 찾을 수 없음' })
-  // remove(@Param('id', ParseIntPipe) id: string) {
-  remove(@Param('id') id: string) {
-    // return this.directorService.remove(+id);
+  remove(@Param('id', ParseIntPipe) id: number) {
+    // remove(@Param('id') id: string) {
     return this.directorService.remove(id);
+    // return this.directorService.remove(id);
   }
 }

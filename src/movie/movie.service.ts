@@ -8,12 +8,12 @@ import {
   UnauthorizedException,
 } from '@nestjs/common';
 import { UpdateMovieDto } from './dto/update-movie.dto';
-// import { Movie } from './entity/movie.entity';
+import { Movie } from './entity/movie.entity';
 import { In, Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
-// import { MovieDetail } from './entity/movie-detail.entity';
-// import { Director } from 'src/director/entity/director.entity';
-// import { Genre } from 'src/genre/entity/genre.entity';
+import { MovieDetail } from './entity/movie-detail.entity';
+import { Director } from 'src/director/entity/director.entity';
+import { Genre } from 'src/genre/entity/genre.entity';
 import { DataSource } from 'typeorm';
 import { GetMoviesDto } from './dto/get-movies.dto';
 import { CommonService } from 'src/common/common.service';
@@ -21,57 +21,57 @@ import { QueryRunner } from 'typeorm';
 import { Prisma } from '@prisma/client';
 import { join } from 'path';
 import { rename } from 'fs/promises';
-// import { User } from 'src/user/entity/user.entity';
-// import { MovieUserLike } from './entity/movie-user-like.entity';
+import { User } from 'src/user/entity/user.entity';
+import { MovieUserLike } from './entity/movie-user-like.entity';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { ConfigService } from '@nestjs/config';
 import { envVariableKeys } from 'src/common/const/env.const';
 import { PrismaService } from 'src/common/prisma.service';
-import { Movie, MovieSchema } from './schema/movie.schema';
-import { MovieDetail, MovieDetailSchema } from './schema/movie-detail.schema';
-import { Director, DirectorSchema } from 'src/director/schema/director.schema';
-import { Genre, GenreSchema } from 'src/genre/schema/genre.schema';
-import { User, UserSchema } from 'src/user/schema/user.schema';
-import {
-  MovieUserLike,
-  MovieUserLikeSchema,
-} from './schema/movie-user-like.schema';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types, Document } from 'mongoose';
+// import { Movie, MovieSchema } from './schema/movie.schema';
+// import { MovieDetail, MovieDetailSchema } from './schema/movie-detail.schema';
+// import { Director, DirectorSchema } from 'src/director/schema/director.schema';
+// import { Genre, GenreSchema } from 'src/genre/schema/genre.schema';
+// import { User, UserSchema } from 'src/user/schema/user.schema';
+// import {
+//   MovieUserLike,
+//   MovieUserLikeSchema,
+// } from './schema/movie-user-like.schema';
+// import { InjectModel } from '@nestjs/mongoose';
+// import { Model, Types, Document } from 'mongoose';
 
 @Injectable()
 export class MovieService {
   constructor(
-    // @InjectRepository(Movie)
-    // private readonly movieRepository: Repository<Movie>,
-    // @InjectRepository(MovieDetail)
-    // private readonly movieDetailRepository: Repository<MovieDetail>,
-    // @InjectRepository(Director)
-    // private readonly directorRepository: Repository<Director>,
-    // @InjectRepository(Genre)
-    // private readonly genreRepository: Repository<Genre>,
-    // @InjectRepository(User)
-    // private readonly userRepository: Repository<User>,
-    // @InjectRepository(MovieUserLike)
-    // private readonly movieUserLikeRepository: Repository<MovieUserLike>,
+    @InjectRepository(Movie)
+    private readonly movieRepository: Repository<Movie>,
+    @InjectRepository(MovieDetail)
+    private readonly movieDetailRepository: Repository<MovieDetail>,
+    @InjectRepository(Director)
+    private readonly directorRepository: Repository<Director>,
+    @InjectRepository(Genre)
+    private readonly genreRepository: Repository<Genre>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
+    @InjectRepository(MovieUserLike)
+    private readonly movieUserLikeRepository: Repository<MovieUserLike>,
     private readonly prismaService: PrismaService,
     private readonly dataSource: DataSource,
     private readonly commonService: CommonService,
     @Inject(CACHE_MANAGER)
     private readonly cacheManager: Cache,
     private readonly configService: ConfigService,
-    @InjectModel(Movie.name)
-    private readonly movieModel: Model<Movie>,
-    @InjectModel(MovieDetail.name)
-    private readonly movieDetailModel: Model<MovieDetail>,
-    @InjectModel(Director.name)
-    private readonly directorModel: Model<Director>,
-    @InjectModel(Genre.name)
-    private readonly genreModel: Model<Genre>,
-    @InjectModel(User.name)
-    private readonly userModel: Model<User>,
-    @InjectModel(MovieUserLike.name)
-    private readonly movieUserLikeModel: Model<MovieUserLike>,
+    // @InjectModel(Movie.name)
+    // private readonly movieModel: Model<Movie>,
+    // @InjectModel(MovieDetail.name)
+    // private readonly movieDetailModel: Model<MovieDetail>,
+    // @InjectModel(Director.name)
+    // private readonly directorModel: Model<Director>,
+    // @InjectModel(Genre.name)
+    // private readonly genreModel: Model<Genre>,
+    // @InjectModel(User.name)
+    // private readonly userModel: Model<User>,
+    // @InjectModel(MovieUserLike.name)
+    // private readonly movieUserLikeModel: Model<MovieUserLike>,
   ) {}
 
   async findRecent() {
@@ -81,27 +81,27 @@ export class MovieService {
       return cacheData;
     }
 
-    // const data = await this.movieRepository.find({
-    //   order: {
-    //     createdAt: 'DESC',
-    //   },
-    //   take: 10,
-    // });
+    const data = await this.movieRepository.find({
+      order: {
+        createdAt: 'DESC',
+      },
+      take: 10,
+    });
     // const data = await this.prismaService.movie.findMany({
     //   orderBy: {
     //     createdAt: 'desc',
     //   },
     //   take: 10,
     // });
-    const data = await this.movieModel
-      .find()
-      .sort({ createdAt: -1 })
-      .populate({
-        path: 'genres',
-        model: 'Genre',
-      })
-      .limit(10)
-      .exec();
+    // const data = await this.movieModel
+    //   .find()
+    //   .sort({ createdAt: -1 })
+    //   .populate({
+    //     path: 'genres',
+    //     model: 'Genre',
+    //   })
+    //   .limit(10)
+    //   .exec();
 
     await this.cacheManager.set('MOVIE_RECENT', data);
 
@@ -110,40 +110,39 @@ export class MovieService {
 
   /* istanbul ignore next */
   async getMovies() {
-    // return this.movieRepository
-    //   .createQueryBuilder('movie')
-    //   .leftJoinAndSelect('movie.director', 'director')
-    //   .leftJoinAndSelect('movie.genres', 'genres');
+    return this.movieRepository
+      .createQueryBuilder('movie')
+      .leftJoinAndSelect('movie.director', 'director')
+      .leftJoinAndSelect('movie.genres', 'genres');
   }
 
   /* istanbul ignore next */
   async getLikedMovies(movieIds: number[], userId: number) {
-    // return this.movieUserLikeRepository
-    //   .createQueryBuilder('mul')
-    //   .leftJoinAndSelect('mul.movie', 'movie')
-    //   .leftJoinAndSelect('mul.user', 'user')
-    //   .where('movie.id IN (:...movieIds)', { movieIds })
-    //   .andWhere('user.id = :userId', { userId })
-    //   .getMany();
+    return this.movieUserLikeRepository
+      .createQueryBuilder('mul')
+      .leftJoinAndSelect('mul.movie', 'movie')
+      .leftJoinAndSelect('mul.user', 'user')
+      .where('movie.id IN (:...movieIds)', { movieIds })
+      .andWhere('user.id = :userId', { userId })
+      .getMany();
   }
 
   async findAll(dto: GetMoviesDto, userId?: string) {
-    // const { title } = dto;
     const { title, cursor, take, order } = dto;
 
-    const orderBy = order.reduce((acc, field) => {
-      const [column, direction] = field.split('_');
-      if (column === 'id') {
-        acc['_id'] = direction.toLowerCase();
-      } else {
-        acc[column] = direction.toLowerCase();
-      }
-      return acc;
-    }, {});
-    // const orderBy = order.map((field) => {
+    // const orderBy = order.reduce((acc, field) => {
     //   const [column, direction] = field.split('_');
-    //   return { [column]: direction.toLocaleLowerCase() };
-    // });
+    //   if (column === 'id') {
+    //     acc['_id'] = direction.toLowerCase();
+    //   } else {
+    //     acc[column] = direction.toLowerCase();
+    //   }
+    //   return acc;
+    // }, {});
+    const orderBy = order.map((field) => {
+      const [column, direction] = field.split('_');
+      return { [column]: direction.toLocaleLowerCase() };
+    });
 
     // const movies = await this.prismaService.movie.findMany({
     //   where: title ? { title: { contains: title } } : {},
@@ -157,52 +156,31 @@ export class MovieService {
     //   },
     // });
 
-    const query = this.movieModel
-      .find(
-        title
-          ? {
-              title: {
-                $regex: title,
-                $options: 'i',
-              },
-            }
-          : {},
-      )
-      .sort(orderBy)
-      .limit(take + 1);
+    // const query = this.movieModel
+    //   .find(
+    //     title
+    //       ? {
+    //           title: {
+    //             $regex: title,
+    //             $options: 'i',
+    //           },
+    //         }
+    //       : {},
+    //   )
+    //   .sort(orderBy)
+    //   .limit(take + 1);
 
-    if (cursor) {
-      query.lt('_id', new Types.ObjectId(cursor));
-    }
-
-    const movies = await query.populate('genres director').exec();
-
-    const hasNextPage = movies.length > take;
-
-    if (hasNextPage) {
-      movies.pop();
-    }
-
-    // const nextCursor = hasNextPage
-    //   ? movies[movies.length - 1].id.toString()
-    //   : null;
-    const nextCursor = hasNextPage
-      ? movies[movies.length - 1]._id.toString()
-      : null;
-
-    const data = movies.slice(0, take);
-    // const count = await this.prismaService.movie.count({
-    //   where: title ? { title: { contains: title } } : {},
-    // });
-    const count = await this.movieModel.countDocuments(
-      title ? { title: { $regex: title, $options: 'i' } } : {},
-    );
-
-    // const qb = await this.getMovies();
-
-    // if (title) {
-    //   qb.where('movie.title LIKE :title', { title: `%${title}%` });
+    // if (cursor) {
+    //   query.lt('_id', new Types.ObjectId(cursor));
     // }
+
+    // const movies = await query.populate('genres director').exec();
+
+    const qb = await this.getMovies();
+
+    if (title) {
+      qb.where('movie.title LIKE :title', { title: `%${title}%` });
+    }
 
     // page pagination
     // if (take && page) {
@@ -210,18 +188,22 @@ export class MovieService {
     // }
 
     // cursor pagination
-    // const { nextCursor } =
-    //   await this.commonService.applyCursorPaginationParamsToQb(qb, dto);
+    const { nextCursor } =
+      await this.commonService.applyCursorPaginationParamsToQb(qb, dto);
 
-    // let [data, count] = await qb.getManyAndCount();
+    let [data, count] = await qb.getManyAndCount();
+
+    const hasNextPage = data.length > take;
+
+    if (hasNextPage) {
+      data.pop();
+    }
 
     if (userId) {
-      // const movieIds = data.map((movie) => movie.id);
-      // const movieIds = movies.map((movie) => movie.id);
-      const movieIds = movies.map((movie) => movie._id);
+      const movieIds = data.map((movie) => movie.id);
 
-      // const likedMovies =
-      //   movieIds.length > 0 ? await this.getLikedMovies(movieIds, userId) : [];
+      const likedMovies =
+        movieIds.length > 0 ? await this.getLikedMovies(movieIds, +userId) : [];
       // const likedMovies =
       //   movieIds.length < 1
       //     ? []
@@ -234,63 +216,62 @@ export class MovieService {
       //           movie: true,
       //         },
       //       });
-      const likedMovies =
-        movieIds.length < 1
-          ? []
-          : await this.movieUserLikeModel
-              .find({
-                movie: {
-                  $in: movieIds.map((id) => new Types.ObjectId(id.toString())),
-                },
-                user: new Types.ObjectId(userId.toString()),
-              })
-              .populate('movie')
-              .exec();
+      // const likedMovies =
+      //   movieIds.length < 1
+      //     ? []
+      //     : await this.movieUserLikeModel
+      //         .find({
+      //           movie: {
+      //             $in: movieIds.map((id) => new Types.ObjectId(id.toString())),
+      //           },
+      //           user: new Types.ObjectId(userId.toString()),
+      //         })
+      //         .populate('movie')
+      //         .exec();
 
-      // const likedMovieMap = likedMovies.reduce(
-      //   (acc, next) => ({
-      //     ...acc,
-      //     [next.movie.id]: next.isLike,
-      //   }),
-      //   {},
-      // );
       const likedMovieMap = likedMovies.reduce(
         (acc, next) => ({
           ...acc,
-          [next.movie._id.toString()]: next.isLike,
+          [next.movie.id]: next.isLike,
         }),
         {},
       );
-
-      // return {
-      //   data: movies.map((movie) => ({
-      //     ...movie,
-      //     likeStatus:
-      //       movie.id in likedMovieMap ? likedMovieMap[movie.id] : null,
-      //   })),
-      //   nextCursor,
-      //   hasNextPage,
-      // };
+      // const likedMovieMap = likedMovies.reduce(
+      //   (acc, next) => ({
+      //     ...acc,
+      //     [next.movie._id.toString()]: next.isLike,
+      //   }),
+      //   {},
+      // );
 
       return {
-        data: movies.map((movie) => ({
-          ...movie.toObject(),
+        data: data.map((movie) => ({
+          ...movie,
           likeStatus:
-            movie._id.toString() in likedMovieMap
-              ? likedMovieMap[movie._id.toString()]
-              : null,
-        })) as (Document<unknown, {}, Movie> &
-          Movie &
-          Required<{
-            _id: unknown;
-          }> & {
-            __v?: number;
-          } & {
-            likeStatus: boolean;
-          })[],
+            movie.id in likedMovieMap ? likedMovieMap[movie.id] : null,
+        })),
         nextCursor,
         hasNextPage,
       };
+      // return {
+      //   data: movies.map((movie) => ({
+      //     ...movie.toObject(),
+      //     likeStatus:
+      //       movie._id.toString() in likedMovieMap
+      //         ? likedMovieMap[movie._id.toString()]
+      //         : null,
+      //   })) as (Document<unknown, {}, Movie> &
+      //     Movie &
+      //     Required<{
+      //       _id: unknown;
+      //     }> & {
+      //       __v?: number;
+      //     } & {
+      //       likeStatus: boolean;
+      //     })[],
+      //   nextCursor,
+      //   hasNextPage,
+      // };
 
       // data = data.map((x) => ({
       //   ...x,
@@ -298,34 +279,33 @@ export class MovieService {
       // }));
     }
 
-    // return { data, count, nextCursor };
-    return {
-      data: movies,
-      nextCursor,
-      hasNextPage,
-    };
+    return { data, count, nextCursor };
+    // return {
+    //   data: movies,
+    //   nextCursor,
+    //   hasNextPage,
+    // };
   }
 
   /* istanbul ignore next */
   async findMovieDetail(id: number) {
-    // return this.movieRepository
-    //   .createQueryBuilder('movie')
-    //   .leftJoinAndSelect('movie.director', 'director')
-    //   .leftJoinAndSelect('movie.genres', 'genres')
-    //   .leftJoinAndSelect('movie.detail', 'detail')
-    //   .leftJoinAndSelect('movie.creator', 'creator')
-    //   .where('movie.id = :id', { id })
-    //   .getOne();
+    return this.movieRepository
+      .createQueryBuilder('movie')
+      .leftJoinAndSelect('movie.director', 'director')
+      .leftJoinAndSelect('movie.genres', 'genres')
+      .leftJoinAndSelect('movie.detail', 'detail')
+      .leftJoinAndSelect('movie.creator', 'creator')
+      .where('movie.id = :id', { id })
+      .getOne();
   }
 
-  // async findOne(id: number) {
-  async findOne(id: string) {
-    // const movie = await this.findMovieDetail(id);
+  async findOne(id: number) {
+    const movie = await this.findMovieDetail(id);
 
     // const movie = await this.prismaService.movie.findUnique({
     //   where: { id },
     // });
-    const movie = await this.movieModel.findById(id);
+    // const movie = await this.movieModel.findById(id);
 
     // const movie = await this.movieRepository.findOne({
     //   where: { id },
@@ -341,14 +321,14 @@ export class MovieService {
 
   /* istanbul ignore next */
   async createMovieDetail(qr: QueryRunner, CreateMovieDto: CreateMovieDto) {
-    // return qr.manager
-    //   .createQueryBuilder()
-    //   .insert()
-    //   .into(MovieDetail)
-    //   .values({
-    //     detail: CreateMovieDto.detail,
-    //   })
-    //   .execute();
+    return qr.manager
+      .createQueryBuilder()
+      .insert()
+      .into(MovieDetail)
+      .values({
+        detail: CreateMovieDto.detail,
+      })
+      .execute();
   }
 
   /* istanbul ignore next */
@@ -360,30 +340,30 @@ export class MovieService {
     userId: number,
     movieFolder: string,
   ) {
-    // return qr.manager
-    //   .createQueryBuilder()
-    //   .insert()
-    //   .into(Movie)
-    //   .values({
-    //     title: createMovieDto.title,
-    //     detail: {
-    //       id: movieDetailId,
-    //     },
-    //     director,
-    //     creator: {
-    //       id: userId,
-    //     },
-    //     movieFilePath: join(movieFolder, createMovieDto.movieFileName),
-    //   })
-    //   .execute();
+    return qr.manager
+      .createQueryBuilder()
+      .insert()
+      .into(Movie)
+      .values({
+        title: createMovieDto.title,
+        detail: {
+          id: movieDetailId,
+        },
+        director,
+        creator: {
+          id: userId,
+        },
+        movieFilePath: join(movieFolder, createMovieDto.movieFileName),
+      })
+      .execute();
   }
 
   createMovieGenreRelation(qr: QueryRunner, movieId: number, genres: Genre[]) {
-    // return qr.manager
-    //   .createQueryBuilder()
-    //   .relation(Movie, 'genres')
-    //   .of(movieId)
-    //   .add(genres.map((genre) => genre.id));
+    return qr.manager
+      .createQueryBuilder()
+      .relation(Movie, 'genres')
+      .of(movieId)
+      .add(genres.map((genre) => genre.id));
   }
 
   renameMovieFile(
@@ -404,84 +384,140 @@ export class MovieService {
   }
 
   //prisma and mongoose
-  async create(createMovieDto: CreateMovieDto, userId: string) {
-    const session = await this.movieModel.startSession();
-    session.startTransaction();
+  async create(createMovieDto: CreateMovieDto, qr: QueryRunner, userId: number) {
+    // const session = await this.movieModel.startSession();
+    // session.startTransaction();
+
+    // try {
+    //   const director = await this.directorModel
+    //     .findById(createMovieDto.directorId)
+    //     .exec();
+
+    //   if (!director) {
+    //     throw new NotFoundException('존재하지 않는 ID의 감독입니다!');
+    //   }
+
+    //   // genreIds를 ObjectId로 변환 (number를 string으로 변환 후 ObjectId 생성)
+    //   const genreObjectIds = createMovieDto.genreIds.map(
+    //     (id) => new Types.ObjectId(String(id)),
+    //   );
+
+    //   const genres = await this.genreModel
+    //     .find({ _id: { $in: genreObjectIds } })
+    //     .exec();
+
+    //   if (genres.length !== createMovieDto.genreIds.length) {
+    //     throw new NotFoundException(
+    //       `존재하지 않는 장르가 있습니다! 존재하는 ids -> ${genres.map((genre) => genre._id.toString()).join(',')}`,
+    //     );
+    //   }
+
+    //   // userId를 ObjectId로 변환
+    //   const user = await this.userModel.findById(userId).exec();
+    //   if (!user) {
+    //     throw new NotFoundException('존재하지 않는 사용자입니다!');
+    //   }
+
+    //   const movieDetail = await this.movieDetailModel.create(
+    //     [
+    //       {
+    //         detail: createMovieDto.detail,
+    //       },
+    //     ],
+    //     {
+    //       session,
+    //     },
+    //   );
+
+    //   const movie = await this.movieModel.create(
+    //     [
+    //       {
+    //         title: createMovieDto.title,
+    //         movieFilePath: createMovieDto.movieFileName,
+    //         creator: new Types.ObjectId(userId),
+    //         director: director._id,
+    //         genres: genres.map((genre) => genre._id),
+    //         detail: movieDetail[0]._id,
+    //       },
+    //     ],
+    //     {
+    //       session,
+    //     },
+    //   );
+
+    //   await session.commitTransaction();
+
+    //   return this.movieModel
+    //     .findById(movie[0]._id)
+    //     .populate('detail')
+    //     .populate('director')
+    //     .populate({
+    //       path: 'genres',
+    //       model: 'Genre',
+    //     })
+    //     .exec();
+    // } catch (e) {
+    //   await session.abortTransaction();
+    //   console.log(e);
+    //   throw new InternalServerErrorException('트랜잭션 실패');
+    // } finally {
+    //   session.endSession();
+    // }
+
+    // const qr = this.dataSource.createQueryRunner();
+    // await qr.connect();
+    // await qr.startTransaction();
 
     try {
-      const director = await this.directorModel
-        .findById(createMovieDto.directorId)
-        .exec();
+      const director = await qr.manager.findOne(Director, {
+        where: { id: createMovieDto.directorId },
+      });
 
       if (!director) {
-        throw new NotFoundException('존재하지 않는 ID의 감독입니다!');
-      }
-
-      // genreIds를 ObjectId로 변환 (number를 string으로 변환 후 ObjectId 생성)
-      const genreObjectIds = createMovieDto.genreIds.map(
-        (id) => new Types.ObjectId(String(id)),
-      );
-
-      const genres = await this.genreModel
-        .find({ _id: { $in: genreObjectIds } })
-        .exec();
-
-      if (genres.length !== createMovieDto.genreIds.length) {
         throw new NotFoundException(
-          `존재하지 않는 장르가 있습니다! 존재하는 ids -> ${genres.map((genre) => genre._id.toString()).join(',')}`,
+          `Director with ID ${createMovieDto.directorId} not found`,
         );
       }
 
-      // userId를 ObjectId로 변환
-      const user = await this.userModel.findById(userId).exec();
-      if (!user) {
-        throw new NotFoundException('존재하지 않는 사용자입니다!');
+      const genres = await qr.manager.find(Genre, {
+        where: { id: In(createMovieDto.genreIds) },
+      });
+
+      if (genres.length !== createMovieDto.genreIds.length) {
+        throw new NotFoundException(
+          `존재하지 않는 장르가 있습니다. 존재하는 장르: ${genres.map((genre) => genre.id).join(', ')}`,
+        );
       }
 
-      const movieDetail = await this.movieDetailModel.create(
-        [
-          {
-            detail: createMovieDto.detail,
-          },
-        ],
-        {
-          session,
-        },
+      const movieDetail = await this.createMovieDetail(qr, createMovieDto);
+
+      const movieDetailId = movieDetail.identifiers[0].id;
+
+      const movieFolder = join('public', 'movie');
+      const tempFolder = join('public', 'temp');
+
+      const movie = await this.createMovie(
+        qr,
+        createMovieDto,
+        director,
+        movieDetailId,
+        userId,
+        movieFolder,
       );
 
-      const movie = await this.movieModel.create(
-        [
-          {
-            title: createMovieDto.title,
-            movieFilePath: createMovieDto.movieFileName,
-            creator: new Types.ObjectId(userId),
-            director: director._id,
-            genres: genres.map((genre) => genre._id),
-            detail: movieDetail[0]._id,
-          },
-        ],
-        {
-          session,
-        },
-      );
+      const movieId = movie.identifiers[0].id;
 
-      await session.commitTransaction();
+      await this.createMovieGenreRelation(qr, movieId, genres);
 
-      return this.movieModel
-        .findById(movie[0]._id)
-        .populate('detail')
-        .populate('director')
-        .populate({
-          path: 'genres',
-          model: 'Genre',
-        })
-        .exec();
+      await this.renameMovieFile(tempFolder, movieFolder, createMovieDto);
+      // throw new InternalServerErrorException('트랜잭션 확인용 에러'); // 트랜잭션 확인용
+
+      return qr.manager.findOne(Movie, {
+        where: { id: movieId },
+        relations: ['detail', 'director', 'genres'],
+      });
     } catch (e) {
-      await session.abortTransaction();
-      console.log(e);
-      throw new InternalServerErrorException('트랜잭션 실패');
-    } finally {
-      session.endSession();
+      throw e;
     }
 
     // return this.prisma.$transaction(async (prisma) => {
@@ -596,22 +632,22 @@ export class MovieService {
 
   /* istanbul ignore next */
   updateMovie(qr: QueryRunner, movieUpdateFields: Partial<Movie>, id: number) {
-    // return qr.manager
-    //   .createQueryBuilder()
-    //   .update(Movie)
-    //   .set(movieUpdateFields)
-    //   .where('id = :id', { id })
-    //   .execute();
+    return qr.manager
+      .createQueryBuilder()
+      .update(Movie)
+      .set(movieUpdateFields)
+      .where('id = :id', { id })
+      .execute();
   }
 
   /* istanbul ignore next */
   updateMovieDetail(qr: QueryRunner, detail: string, movie: Movie) {
-    // return qr.manager
-    //   .createQueryBuilder()
-    //   .update(MovieDetail)
-    //   .set({ detail })
-    //   .where('id = :id', { id: movie.detail.id })
-    //   .execute();
+    return qr.manager
+      .createQueryBuilder()
+      .update(MovieDetail)
+      .set({ detail })
+      .where('id = :id', { id: movie.detail.id })
+      .execute();
   }
 
   /* istanbul ignore next */
@@ -621,97 +657,182 @@ export class MovieService {
     newGenres: Genre[],
     movie: Movie,
   ) {
-    // return qr.manager
-    //   .createQueryBuilder()
-    //   .relation(Movie, 'genres')
-    //   .of(id)
-    //   .addAndRemove(
-    //     newGenres.map((genre) => genre.id),
-    //     movie.genres.map((genre) => genre.id),
-    //   );
+    return qr.manager
+      .createQueryBuilder()
+      .relation(Movie, 'genres')
+      .of(id)
+      .addAndRemove(
+        newGenres.map((genre) => genre.id),
+        movie.genres.map((genre) => genre.id),
+      );
   }
 
-  // async update(id: number, updateMovieDto: UpdateMovieDto) {
-  async update(id: string, updateMovieDto: UpdateMovieDto) {
-    const session = await this.movieModel.startSession();
-    session.startTransaction();
+  async update(id: number, updateMovieDto: UpdateMovieDto, qr: QueryRunner) {
+    // async update(id: string, updateMovieDto: UpdateMovieDto) {
+    // const session = await this.movieModel.startSession();
+    // session.startTransaction();
+
+    // try {
+    //   const movie = await this.movieModel
+    //     .findById(id)
+    //     .populate('detail genres')
+    //     .exec();
+
+    //   if (!movie) {
+    //     throw new NotFoundException('존재하지 않는 ID의 영화입니다!');
+    //   }
+
+    //   const { detail, directorId, genreIds, ...movieRest } = updateMovieDto;
+
+    //   const movieUpdateParams: {
+    //     title?: string;
+    //     movieFileName?: string;
+    //     director?: Types.ObjectId;
+    //     genres?: Types.ObjectId[];
+    //   } = {
+    //     ...movieRest,
+    //   };
+
+    //   if (directorId) {
+    //     const director = await this.directorModel.findById(directorId).exec();
+
+    //     if (!director) {
+    //       throw new NotFoundException('존재하지 않는 ID의 감독입니다!');
+    //     }
+
+    //     movieUpdateParams.director = director._id;
+    //   }
+
+    //   if (genreIds) {
+    //     // genreIds를 ObjectId로 변환 (number를 string으로 변환 후 ObjectId 생성)
+    //     const genreObjectIds = genreIds.map(
+    //       (id) => new Types.ObjectId(String(id)),
+    //     );
+
+    //     const genres = await this.genreModel
+    //       .find({
+    //         _id: { $in: genreObjectIds },
+    //       })
+    //       .exec();
+
+    //     if (genres.length !== genreIds.length) {
+    //       throw new NotFoundException(
+    //         `존재하지 않는 장르가 있습니다! 존재하는 ids -> ${genres.map((genre) => genre._id.toString()).join(',')}`,
+    //       );
+    //     }
+
+    //     movieUpdateParams.genres = genres.map((genre) => genre._id);
+    //   }
+
+    //   if (detail) {
+    //     await this.movieDetailModel
+    //       .findByIdAndUpdate(movie.detail._id, {
+    //         detail,
+    //       })
+    //       .exec();
+    //   }
+
+    //   await this.movieModel.findByIdAndUpdate(id, movieUpdateParams);
+
+    //   await session.commitTransaction();
+
+    //   return this.movieModel
+    //     .findById(id)
+    //     .populate('detail director')
+    //     .populate({
+    //       path: 'genres',
+    //       model: 'Genre',
+    //     })
+    //     .exec();
+    // } catch (e) {
+    //   await session.abortTransaction();
+    // } finally {
+    //   session.endSession();
+    // }
 
     try {
-      const movie = await this.movieModel
-        .findById(id)
-        .populate('detail genres')
-        .exec();
+      const movie = await qr.manager.findOne(Movie, {
+        where: { id },
+        relations: ['detail', 'genres'],
+      });
 
       if (!movie) {
-        throw new NotFoundException('존재하지 않는 ID의 영화입니다!');
+        throw new NotFoundException(`Movie with ID ${id} not found`);
       }
 
       const { detail, directorId, genreIds, ...movieRest } = updateMovieDto;
 
-      const movieUpdateParams: {
-        title?: string;
-        movieFileName?: string;
-        director?: Types.ObjectId;
-        genres?: Types.ObjectId[];
-      } = {
-        ...movieRest,
-      };
+      let newDirector;
 
       if (directorId) {
-        const director = await this.directorModel.findById(directorId).exec();
+        const director = await qr.manager.findOne(Director, {
+          where: { id: directorId },
+        });
 
         if (!director) {
-          throw new NotFoundException('존재하지 않는 ID의 감독입니다!');
-        }
-
-        movieUpdateParams.director = director._id;
-      }
-
-      if (genreIds) {
-        // genreIds를 ObjectId로 변환 (number를 string으로 변환 후 ObjectId 생성)
-        const genreObjectIds = genreIds.map(
-          (id) => new Types.ObjectId(String(id)),
-        );
-
-        const genres = await this.genreModel
-          .find({
-            _id: { $in: genreObjectIds },
-          })
-          .exec();
-
-        if (genres.length !== genreIds.length) {
           throw new NotFoundException(
-            `존재하지 않는 장르가 있습니다! 존재하는 ids -> ${genres.map((genre) => genre._id.toString()).join(',')}`,
+            `Director with ID ${directorId} not found`,
           );
         }
 
-        movieUpdateParams.genres = genres.map((genre) => genre._id);
+        newDirector = director;
       }
+
+      let newGenres;
+
+      if (genreIds) {
+        const genres = await qr.manager.find(Genre, {
+          where: { id: In(genreIds) },
+        });
+
+        if (genres.length !== genreIds.length) {
+          throw new NotFoundException(
+            `존재하지 않는 장르가 있습니다. 존재하는 장르: ${genres.map((genre) => genre.id).join(', ')}`,
+          );
+        }
+
+        newGenres = genres;
+      }
+
+      const movieUpdateFields = {
+        ...movieRest,
+        ...(newDirector && { director: newDirector }),
+      };
+
+      await this.updateMovie(qr, movieUpdateFields, id);
+
+      // await this.movieRepository.update({ id }, movieUpdateFields);
+
+      // throw new NotFoundException('test'); // 트랜잭션 확인용
 
       if (detail) {
-        await this.movieDetailModel
-          .findByIdAndUpdate(movie.detail._id, {
-            detail,
-          })
-          .exec();
+        await this.updateMovieDetail(qr, detail, movie);
+
+        // await this.movieDetailRepository.update(
+        //   { id: movie.detail.id },
+        //   { detail },
+        // );
       }
 
-      await this.movieModel.findByIdAndUpdate(id, movieUpdateParams);
+      if (newGenres) {
+        await this.updateMovieGenreRelation(qr, id, newGenres, movie);
+      }
 
-      await session.commitTransaction();
+      const newMovie = await this.movieRepository.findOne({
+        where: { id },
+        relations: ['detail', 'director', 'genres'],
+      });
 
-      return this.movieModel
-        .findById(id)
-        .populate('detail director')
-        .populate({
-          path: 'genres',
-          model: 'Genre',
-        })
-        .exec();
+      newMovie!.genres = newGenres;
+
+      await this.movieRepository.save(newMovie!);
+
+      return this.movieRepository.findOne({
+        where: { id },
+        relations: ['detail', 'director', 'genres'],
+      });
     } catch (e) {
-      await session.abortTransaction();
-    } finally {
-      session.endSession();
+      throw e;
     }
 
     // return this.prismaService.$transaction(async (prisma) => {
@@ -884,87 +1005,85 @@ export class MovieService {
 
   /* istanbul ignore next */
   deleteMovie(id: number) {
-    // return this.movieRepository
-    //   .createQueryBuilder()
-    //   .delete()
-    //   .where('id = :id', { id })
-    //   .execute();
+    return this.movieRepository
+      .createQueryBuilder()
+      .delete()
+      .where('id = :id', { id })
+      .execute();
   }
 
-  // async remove(id: number) {
-  async remove(id: string) {
-    // const movie = await this.movieRepository.findOne({
-    //   where: { id },
-    //   relations: ['detail'],
-    // });
+  async remove(id: number) {
+    const movie = await this.movieRepository.findOne({
+      where: { id },
+      relations: ['detail'],
+    });
     // const movie = await this.prismaService.movie.findUnique({
     //   where: { id },
     //   include: {
     //     detail: true,
     //   },
     // });
-    const movie = await this.movieModel.findById(id).populate('detail').exec();
+    // const movie = await this.movieModel.findById(id).populate('detail').exec();
 
     if (!movie) {
       throw new NotFoundException(`Movie with ID ${id} not found`);
     }
 
-    // await this.deleteMovie(id);
+    await this.deleteMovie(id);
     // await this.prismaService.movie.delete({ where: { id } });
     // await this.movieRepository.delete(id);
-    await this.movieModel.findByIdAndDelete(id).exec();
+    // await this.movieModel.findByIdAndDelete(id).exec();
 
-    // await this.movieDetailRepository.delete({ id: movie.detail.id });
+    await this.movieDetailRepository.delete({ id: movie.detail.id });
     // await this.prismaService.movieDetail.delete({
     //   where: { id: movie.detail.id },
     // });
-    await this.movieDetailModel.findByIdAndDelete(movie.detail._id).exec();
+    // await this.movieDetailModel.findByIdAndDelete(movie.detail._id).exec();
 
     return id;
   }
 
   /* istanbul ignore next */
   getLikedRecord(movieId: number, userId: number) {
-    // return this.movieUserLikeRepository
-    //   .createQueryBuilder('mul')
-    //   .leftJoinAndSelect('mul.movie', 'movie')
-    //   .leftJoinAndSelect('mul.user', 'user')
-    //   .where('movie.id = :movieId', { movieId })
-    //   .andWhere('user.id = :userId', { userId })
-    //   .getOne();
+    return this.movieUserLikeRepository
+      .createQueryBuilder('mul')
+      .leftJoinAndSelect('mul.movie', 'movie')
+      .leftJoinAndSelect('mul.user', 'user')
+      .where('movie.id = :movieId', { movieId })
+      .andWhere('user.id = :userId', { userId })
+      .getOne();
   }
 
-  // async toggleMovieLike(movieId: number, userId: number, isLike: boolean) {
-  async toggleMovieLike(movieId: string, userId: string, isLike: boolean) {
-    // const movie = await this.movieRepository.findOne({
-    //   where: { id: movieId },
-    //   relations: ['likedUsers'],
-    // });
+  async toggleMovieLike(movieId: number, userId: number, isLike: boolean) {
+    const movie = await this.movieRepository.findOne({
+      where: { id: movieId },
+      relations: ['likedUsers'],
+    });
     // const movie = await this.prismaService.movie.findUnique({
     //   where: { id: movieId },
     //   include: {
     //     likedUsers: true,
     //   },
     // });
-    const movie = await this.movieModel.findById(movieId).exec();
+    // const movie = await this.movieModel.findById(movieId).exec();
 
     if (!movie) {
       throw new BadRequestException(`존재하지 않는 영화입니다.`);
     }
 
-    // const user = await this.userRepository.findOne({
-    //   where: { id: userId },
-    // });
+    const user = await this.userRepository.findOne({
+      where: { id: userId },
+    });
     // const user = await this.prismaService.user.findUnique({
     //   where: { id: userId },
     // });
-    const user = await this.userModel.findById(userId).exec();
+    // const user = await this.userModel.findById(userId).exec();
 
     if (!user) {
       throw new UnauthorizedException(`존재하지 않는 사용자입니다.`);
     }
 
-    // const likeRecord = await this.getLikedRecord(movieId, userId);
+    const likeRecord = await this.getLikedRecord(movieId, userId);
     // const likeRecord = await this.prismaService.movieUserLike.findUnique({
     //   where: {
     //     movieId_userId: {
@@ -973,17 +1092,17 @@ export class MovieService {
     //     },
     //   },
     // });
-    const likeRecord = await this.movieUserLikeModel.findOne({
-      movie: new Types.ObjectId(movieId),
-      user: new Types.ObjectId(userId),
-    });
+    // const likeRecord = await this.movieUserLikeModel.findOne({
+    //   movie: new Types.ObjectId(movieId),
+    //   user: new Types.ObjectId(userId),
+    // });
 
     if (likeRecord) {
       if (isLike === likeRecord.isLike) {
-        // await this.movieUserLikeRepository.delete({
-        //   movie,
-        //   user,
-        // });
+        await this.movieUserLikeRepository.delete({
+          movie,
+          user,
+        });
         // await this.prismaService.movieUserLike.delete({
         //   where: {
         //     movieId_userId: {
@@ -992,17 +1111,17 @@ export class MovieService {
         //     },
         //   },
         // });
-        await this.movieUserLikeModel.findByIdAndDelete(likeRecord._id).exec();
+        // await this.movieUserLikeModel.findByIdAndDelete(likeRecord._id).exec();
       } else {
-        // await this.movieUserLikeRepository.update(
-        //   {
-        //     movie,
-        //     user,
-        //   },
-        //   {
-        //     isLike,
-        //   },
-        // );
+        await this.movieUserLikeRepository.update(
+          {
+            movie,
+            user,
+          },
+          {
+            isLike,
+          },
+        );
         // await this.prismaService.movieUserLike.update({
         //   where: {
         //     movieId_userId: {
@@ -1015,15 +1134,15 @@ export class MovieService {
         // await this.movieUserLikeModel
         //   .findByIdAndUpdate(likeRecord._id, { isLike })
         //   .exec();
-        likeRecord.isLike = isLike;
-        await likeRecord.save();
+        // likeRecord.isLike = isLike;
+        // await likeRecord.save();
       }
     } else {
-      // await this.movieUserLikeRepository.save({
-      //   movie,
-      //   user,
-      //   isLike,
-      // });
+      await this.movieUserLikeRepository.save({
+        movie,
+        user,
+        isLike,
+      });
       // await this.prismaService.movieUserLike.create({
       //   data: {
       //     movie: { connect: { id: movieId } },
@@ -1032,14 +1151,14 @@ export class MovieService {
       //   },
       // });
 
-      await this.movieUserLikeModel.create({
-        movie: new Types.ObjectId(movieId),
-        user: new Types.ObjectId(userId),
-        isLike,
-      });
+      // await this.movieUserLikeModel.create({
+      //   movie: new Types.ObjectId(movieId),
+      //   user: new Types.ObjectId(userId),
+      //   isLike,
+      // });
     }
 
-    // const result = await this.getLikedRecord(movieId, userId);
+    const result = await this.getLikedRecord(movieId, userId);
     // const result = await this.prismaService.movieUserLike.findUnique({
     //   where: {
     //     movieId_userId: {
@@ -1048,10 +1167,10 @@ export class MovieService {
     //     },
     //   },
     // });
-    const result = await this.movieUserLikeModel.findOne({
-      movie: new Types.ObjectId(movieId),
-      user: new Types.ObjectId(userId),
-    });
+    // const result = await this.movieUserLikeModel.findOne({
+    //   movie: new Types.ObjectId(movieId),
+    //   user: new Types.ObjectId(userId),
+    // });
 
     return {
       isLike: result && result.isLike,

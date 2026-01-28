@@ -38,7 +38,7 @@ import * as winston from 'winston';
 import { Chat } from './chat/entity/chat.entity';
 import { ChatRoom } from './chat/entity/chat-room.entity';
 import { WorkerModule } from './worker/worker.module';
-import { MongooseModule } from '@nestjs/mongoose';
+// import { MongooseModule } from '@nestjs/mongoose';
 
 @Module({
   imports: [
@@ -63,19 +63,19 @@ import { MongooseModule } from '@nestjs/mongoose';
         BUCKET_NAME: Joi.string().required(),
       }),
     }),
-    MongooseModule.forRoot(
-      'mongodb+srv://test:test@nestjsmongo.chgdpff.mongodb.net/?appName=NestJSMongo',
-    ),
+    // MongooseModule.forRoot(
+    //   'mongodb+srv://test:test@nestjsmongo.chgdpff.mongodb.net/?appName=NestJSMongo',
+    // ),
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => ({
-        url: configService.get<string>(envVariableKeys.dbUrl),
+        // url: configService.get<string>(envVariableKeys.dbUrl),
         type: configService.get<string>(envVariableKeys.dbType) as 'postgres',
-        // host: configService.get<string>(envVariableKeys.dbHost),
-        // port: configService.get<number>(envVariableKeys.dbPort),
-        // username: configService.get<string>(envVariableKeys.dbUsername),
-        // password: configService.get<string>(envVariableKeys.dbPassword),
-        // database: configService.get<string>(envVariableKeys.dbDatabase),
+        host: configService.get<string>(envVariableKeys.dbHost),
+        port: configService.get<number>(envVariableKeys.dbPort),
+        username: configService.get<string>(envVariableKeys.dbUsername),
+        password: configService.get<string>(envVariableKeys.dbPassword),
+        database: configService.get<string>(envVariableKeys.dbDatabase),
         entities: [
           Movie,
           MovieDetail,

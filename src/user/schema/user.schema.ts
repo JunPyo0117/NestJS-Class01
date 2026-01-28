@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Role } from '@prisma/client';
+import { Role } from 'src/user/entity/user.entity';
+// import { Role } from '@prisma/client';
 import { Document, Types } from 'mongoose';
 import { ChatRoom } from 'src/chat/schema/chat-room.schema';
 import { Chat } from 'src/chat/schema/chat.schema';

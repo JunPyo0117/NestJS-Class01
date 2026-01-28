@@ -4,7 +4,7 @@ import {
   Injectable,
   UnauthorizedException,
 } from '@nestjs/common';
-// import { User, Role } from 'src/user/entity/user.entity';
+import { User, Role } from 'src/user/entity/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
@@ -14,24 +14,24 @@ import { envVariableKeys } from 'src/common/const/env.const';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { UserService } from 'src/user/user.service';
 import { PrismaService } from 'src/common/prisma.service';
-import { PrismaClient, Role } from '@prisma/client';
-import { User } from 'src/user/schema/user.schema';
-import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { PrismaClient } from '@prisma/client';
+// import { User } from 'src/user/schema/user.schema';
+// import { InjectModel } from '@nestjs/mongoose';
+// import { Model } from 'mongoose';
 
 @Injectable()
 export class AuthService {
   constructor(
-    // @InjectRepository(User)
-    // private readonly userRepository: Repository<User>,
+    @InjectRepository(User)
+    private readonly userRepository: Repository<User>,
     private readonly configService: ConfigService,
     private readonly jwtService: JwtService,
     @Inject(CACHE_MANAGER)
     private readonly cacheManager: Cache,
     private readonly userService: UserService,
     // private readonly prismaService: PrismaService,
-    @InjectModel(User.name)
-    private readonly userModel: Model<User>,
+    // @InjectModel(User.name)
+    // private readonly userModel: Model<User>,
   ) {}
 
   async tokenBlock(token: string) {
@@ -127,10 +127,10 @@ export class AuthService {
 
   async authenticate(email: string, password: string) {
     // const user = await this.prismaService.user.findUnique({ where: { email } });
-    // const user = await this.userRepository.findOne({ where: { email } });
-    const user = await this.userModel
-      .findOne({ email }, { password: 1, role: 1 })
-      .exec();
+    const user = await this.userRepository.findOne({ where: { email } });
+    // const user = await this.userModel
+    //   .findOne({ email }, { password: 1, role: 1 })
+    //   .exec();
 
     if (!user) {
       throw new BadRequestException('User not found');
@@ -145,8 +145,7 @@ export class AuthService {
     return user;
   }
 
-  // async issueToken(user: { id: number; role: Role }, isRefreshToken: boolean) {
-  async issueToken(user: { _id: any; role: Role }, isRefreshToken: boolean) {
+  async issueToken(user: { id: number; role: Role }, isRefreshToken: boolean) {
     const refreshTokenSecret = this.configService.get<string>(
       envVariableKeys.refreshTokenSecret,
     )!;
@@ -156,8 +155,7 @@ export class AuthService {
 
     return await this.jwtService.signAsync(
       {
-        // sub: user.id,
-        sub: user._id,
+        sub: user.id,
         role: user.role,
         type: isRefreshToken ? 'refresh' : 'access',
       },
