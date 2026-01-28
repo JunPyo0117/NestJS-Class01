@@ -191,7 +191,7 @@ export class MovieService {
     const { nextCursor } =
       await this.commonService.applyCursorPaginationParamsToQb(qb, dto);
 
-    let [data, count] = await qb.getManyAndCount();
+    const [data, count] = await qb.getManyAndCount();
 
     const hasNextPage = data.length > take;
 
@@ -384,7 +384,11 @@ export class MovieService {
   }
 
   //prisma and mongoose
-  async create(createMovieDto: CreateMovieDto, qr: QueryRunner, userId: number) {
+  async create(
+    createMovieDto: CreateMovieDto,
+    qr: QueryRunner,
+    userId: number,
+  ) {
     // const session = await this.movieModel.startSession();
     // session.startTransaction();
 

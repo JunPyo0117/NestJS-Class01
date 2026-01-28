@@ -7,7 +7,8 @@ export class CursorPaginationDto {
   @IsOptional()
   @ApiProperty({
     description: '페이지네이션 커서',
-    example: 'eyJ2YWx1ZXMiOnsiaWQiOjF9LCJvcmRlciI6WyJpZF9ERVNDIl19',
+    example: '',
+    required: false,
   })
   // id_82, likeCount =_20
   cursor?: string;
@@ -30,7 +31,7 @@ export class CursorPaginationDto {
   @IsInt()
   @ApiProperty({
     description: '페이지네이션 페이지 당 아이템 수',
-    example: 5,
+    example: 2,
   })
   take: number = 2;
 }

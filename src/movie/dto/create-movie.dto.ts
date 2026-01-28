@@ -13,7 +13,7 @@ export class CreateMovieDto {
   @IsString()
   @ApiProperty({
     description: '영화 제목',
-    example: 'The Dark Knight',
+    example: '더글로리',
   })
   title: string;
 
@@ -21,7 +21,7 @@ export class CreateMovieDto {
   @IsString()
   @ApiProperty({
     description: '영화 상세 내용',
-    example: 'The Dark Knight is a superhero movie',
+    example: '한국 드라마 더글로리',
   })
   detail: string;
 
@@ -45,7 +45,8 @@ export class CreateMovieDto {
   // @Type(() => String)
   @ApiProperty({
     description: '장르 객체 ID 배열',
-    example: [1, 2, 3],
+    example: [1, 2],
+    type: [Number],
   })
   genreIds: number[];
   // genreIds: string[];

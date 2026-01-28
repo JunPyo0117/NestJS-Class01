@@ -111,11 +111,7 @@ export class MovieController {
     @UserId() userId: number,
     // @UserId() userId: string,
   ) {
-    return this.movieService.create(
-      body,
-      queryRunner,
-      userId,
-    );
+    return this.movieService.create(body, queryRunner, userId);
   }
 
   @Patch(':id')

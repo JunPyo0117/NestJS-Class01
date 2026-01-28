@@ -6,7 +6,7 @@ export class CreateDirectorDto {
   @IsString()
   @ApiProperty({
     description: '감독 이름',
-    example: 'Christopher Nolan',
+    example: '봉준호',
   })
   name: string;
 
@@ -22,7 +22,7 @@ export class CreateDirectorDto {
   @IsString()
   @ApiProperty({
     description: '감독 국적',
-    example: 'British-American',
+    example: 'South Korea',
   })
   nationality: string;
 }

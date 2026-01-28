@@ -13,5 +13,9 @@ export class CreateUserDto {
 
   @IsNotEmpty()
   @IsString()
+  @ApiProperty({
+    description: '사용자 비밀번호',
+    example: 'password123',
+  })
   password: string;
 }
