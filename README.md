@@ -1,98 +1,126 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
+# Netflix API
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+NestJS + TypeORM(PostgreSQL) 기반 넷플릭스 백엔드 클론 프로젝트입니다.
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+## 기술 스택
 
-## Description
+- **Runtime**: Node.js
+- **Framework**: NestJS
+- **DB**: PostgreSQL, TypeORM
+- **인증**: JWT, Passport (Local, JWT)
+- **문서**: Swagger
+- **캐시**: @nestjs/cache-manager (메모리)
+- **큐**: BullMQ (Redis) — 썸네일 생성 비동기 처리
+- **실시간**: WebSocket (Socket.io) — 채팅
+- **파일**: Multer, AWS S3 (presigned URL)
+- **미디어**: ffmpeg (썸네일 생성)
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+## 주요 기능
 
-## Project setup
+| 도메인       | 설명                                                         |
+| ------------ | ------------------------------------------------------------ |
+| **Movie**    | 영화 CRUD, 커서 페이지네이션, 좋아요/싫어요, 최근 목록 캐싱  |
+| **Director** | 감독 CRUD                                                    |
+| **Genre**    | 장르 CRUD                                                    |
+| **User**     | 회원가입, 프로필                                             |
+| **Auth**     | 로그인(JWT), RBAC(Admin/PaidUser/User), Bearer 토큰 미들웨어 |
+| **Chat**     | WebSocket 실시간 채팅 (유저–어드민 룸 자동 생성)             |
+| **Common**   | 비디오 업로드, S3 presigned URL                              |
+| **Worker**   | BullMQ + Redis 기반 썸네일 생성 (별도 프로세스)              |
 
-```bash
-$ pnpm install
+## 부가 기능
+
+- **API 문서**: Swagger (`/doc`), DTO 예시
+- **캐시**: GET 목록 등 메모리 캐시 (CacheInterceptor)
+- **쓰로틀**: 사용자·분당 요청 수 제한 (ThrottleInterceptor, @Throttle)
+- **커서 페이지네이션**: Base64 커서 + 정렬 지원
+- **트랜잭션**: HTTP/WS 트랜잭션 인터셉터
+
+## 프로젝트 구조
+
+```
+src/
+├── app.module.ts
+├── main.ts
+├── auth/          # 인증, RBAC, JWT
+├── chat/          # WebSocket 채팅
+├── common/        # 공통(캐시, 쓰로틀, BullMQ 설정, 업로드)
+├── director/
+├── genre/
+├── movie/
+├── user/
+└── worker/        # 썸네일 생성 워커 (TYPE=worker 시 로드)
 ```
 
-## Compile and run the project
+## 사전 요구 사항
+
+- Node.js (권장 LTS)
+- pnpm
+- PostgreSQL
+- Redis (BullMQ 큐용 — 썸네일 워커 사용 시)
+
+## 설치
 
 ```bash
-# development
-$ pnpm run start
-
-# watch mode
-$ pnpm run start:dev
-
-# production mode
-$ pnpm run start:prod
+pnpm install
 ```
 
-## Run tests
+## 환경 변수
+
+프로젝트 루트에 `.env` 파일을 만들고 아래 변수를 설정하세요.
+
+| 변수                                                                      | 설명                    |
+| ------------------------------------------------------------------------- | ----------------------- |
+| `ENV`                                                                     | `test` / `dev` / `prod` |
+| `DB_TYPE`                                                                 | `postgres`              |
+| `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`         | PostgreSQL 접속 정보    |
+| `HASH_ROUNDS`                                                             | bcrypt 라운드 수        |
+| `ACCESS_TOKEN_SECRET`, `REFRESH_TOKEN_SECRET`                             | JWT 시크릿              |
+| `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION`, `BUCKET_NAME` | S3 (presigned URL 등)   |
+
+테스트 시에는 `test.env` 사용 (`NODE_ENV=test`).
+
+## 실행
+
+### 메인 앱 (API 서버)
 
 ```bash
-# unit tests
-$ pnpm run test
-
-# e2e tests
-$ pnpm run test:e2e
-
-# test coverage
-$ pnpm run test:cov
+# 개발 (watch)
+pnpm run start:dev
 ```
 
-## Deployment
+기본 포트: `3000`  
+Swagger: http://localhost:3000/doc
 
-When you're ready to deploy your NestJS application to production, there are some key steps you can take to ensure it runs as efficiently as possible. Check out the [deployment documentation](https://docs.nestjs.com/deployment) for more information.
+### 워커 (썸네일 생성)
 
-If you are looking for a cloud-based platform to deploy your NestJS application, check out [Mau](https://mau.nestjs.com), our official platform for deploying NestJS applications on AWS. Mau makes deployment straightforward and fast, requiring just a few simple steps:
+비디오 업로드 시 썸네일을 비동기로 만들려면 **별도 터미널**에서 워커를 실행하세요.
 
 ```bash
-$ pnpm install -g @nestjs/mau
-$ mau deploy
+pnpm run start:dev:worker
 ```
 
-With Mau, you can deploy your application in just a few clicks, allowing you to focus on building features rather than managing infrastructure.
+- `TYPE=worker`, `PORT=3001` 로 실행
+- Redis에 쌓인 `thumbnail-generation` 잡을 처리
+- Redis 연결 정보는 `src/common/common.module.ts`의 BullModule 설정 참고
 
-## Resources
+## 테스트
 
-Check out a few resources that may come in handy when working with NestJS:
+```bash
+# 단위 + 통합 + E2E
+pnpm run test
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Deploy your application to AWS with the help of [NestJS Mau](https://mau.nestjs.com) in just a few clicks.
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
+# 통합 테스트만
+pnpm run test:integration
 
-## Support
+# E2E
+pnpm run test:e2e
 
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
+# 커버리지
+pnpm run test:cov
+```
 
-## Stay in touch
+## API 문서 (Swagger)
 
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+- URL: http://localhost:3000/doc
+- Bearer 토큰: 로그인 후 발급된 JWT를 Swagger Authorize에 입력
