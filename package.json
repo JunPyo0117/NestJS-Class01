@@ -7,6 +7,7 @@
   "license": "UNLICENSED",
   "scripts": {
     "build": "nest build",
+    "build:migration": "nest build && npx tsc src/database/data-source.ts --outDir dist/database --module nodenext --target ES2023 --moduleResolution nodenext --esModuleInterop --skipLibCheck",
     "migration:run": "npx typeorm migration:run -d dist/database/data-source.js",
     "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
     "start": "nest start",

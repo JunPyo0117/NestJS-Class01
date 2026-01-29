@@ -96,7 +96,16 @@ jobs:
         run: npm i
 
       - name: Build Project
-        run: npm run build
+        run: npm run build:migration
+
+      - name: Verify data-source.js exists
+        run: |
+          if [ ! -f "dist/database/data-source.js" ]; then
+            echo "Error: dist/database/data-source.js not found after build"
+            exit 1
+          fi
+          echo "data-source.js found successfully"
+          ls -la dist/database/
 
       - name: Run Tests
         run: npm run test
