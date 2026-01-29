@@ -1,5 +1,6 @@
 import {
   BadGatewayException,
+  Body,
   Controller,
   Post,
   UploadedFile,
@@ -79,9 +80,25 @@ export class CommonController {
   }
 
   @Post('presigned-url')
+  @ApiOperation({
+    description:
+      'S3 업로드용 presigned URL 발급. 응답의 key로 업로드 후 /common/trigger-thumbnail 호출 시 썸네일 생성',
+  })
   async createPresignedUrl() {
-    return {
-      url: await this.commonService.createPresignedUrl(),
-    };
+    return this.commonService.createPresignedUrl();
+  }
+
+  @Post('trigger-thumbnail')
+  @ApiOperation({
+    description:
+      'presigned-url로 S3에 업로드한 영상의 썸네일 생성 트리거. body에 key(예: public/temp/xxx.mp4) 전달',
+  })
+  @ApiResponse({ status: 201, description: '썸네일 작업 큐에 등록됨' })
+  async triggerThumbnail(@Body() body: { key: string }) {
+    if (!body?.key || typeof body.key !== 'string') {
+      throw new BadGatewayException('key (S3 객체 키)가 필요합니다.');
+    }
+    await this.thumbnailQueue.add('thumbnail', { s3Key: body.key });
+    return { message: '썸네일 생성이 큐에 등록되었습니다.', key: body.key };
   }
 }

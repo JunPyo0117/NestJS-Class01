@@ -8,10 +8,16 @@ import { PagePagenationDto } from './dto/page-pagination.dto';
 import { CursorPaginationDto } from './dto/cursor-pagination.dto';
 // import * as AWS from 'aws-sdk';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-import { ObjectCannedACL, PutObjectCommand, S3 } from '@aws-sdk/client-s3';
+import {
+  GetObjectCommand,
+  ObjectCannedACL,
+  PutObjectCommand,
+  S3,
+} from '@aws-sdk/client-s3';
 import { v4 as Uuid } from 'uuid';
 import { ConfigService } from '@nestjs/config';
 import { envVariableKeys } from './const/env.const';
+import { readFile } from 'fs/promises';
 
 @Injectable()
 export class CommonService {
@@ -55,9 +61,10 @@ export class CommonService {
   }
 
   async createPresignedUrl(expiresIn = 3000) {
+    const key = `public/temp/${Uuid()}.mp4`;
     const params = {
       Bucket: this.configService.get<string>(envVariableKeys.bucketName),
-      Key: `public/temp/${Uuid()}.mp4`,
+      Key: key,
       ACL: ObjectCannedACL.public_read,
     };
 
@@ -65,11 +72,54 @@ export class CommonService {
       const url = await getSignedUrl(this.s3, new PutObjectCommand(params), {
         expiresIn,
       });
-      return url;
+      return { url, key };
     } catch (error) {
       console.error(error);
       throw new InternalServerErrorException('S3 presigned url 생성 실패');
     }
+  }
+
+  /** 로컬 썸네일 파일을 S3 public/thumbnail/ 에 업로드 */
+  async uploadThumbnailToS3(localFilePath: string, thumbnailFileName: string) {
+    const bucketName = this.configService.getOrThrow<string>(
+      envVariableKeys.bucketName,
+    );
+    const key = `public/thumbnail/${thumbnailFileName}`;
+    try {
+      const body = await readFile(localFilePath);
+      await this.s3.putObject({
+        Bucket: bucketName,
+        Key: key,
+        Body: body,
+        ContentType: 'image/png',
+        ACL: 'public-read',
+      });
+      return key;
+    } catch (error) {
+      console.error('썸네일 S3 업로드 실패', error);
+      throw new InternalServerErrorException('썸네일 S3 업로드 실패');
+    }
+  }
+
+  /** S3에서 비디오를 로컬 임시 파일로 다운로드 (워커용) */
+  async downloadVideoFromS3ToTemp(s3Key: string): Promise<string> {
+    const bucketName = this.configService.getOrThrow<string>(
+      envVariableKeys.bucketName,
+    );
+    const { createWriteStream } = await import('fs');
+    const { pipeline } = await import('stream/promises');
+    const { tmpdir } = await import('os');
+    const path = await import('path');
+    const tmpPath = path.join(
+      tmpdir(),
+      `video_${Date.now()}_${path.basename(s3Key)}`,
+    );
+    const response = await this.s3.send(
+      new GetObjectCommand({ Bucket: bucketName, Key: s3Key }),
+    );
+    const writeStream = createWriteStream(tmpPath);
+    await pipeline(response.Body as NodeJS.ReadableStream, writeStream);
+    return tmpPath;
   }
 
   applyPagiPaginationParamsToQb<T extends ObjectLiteral>(
