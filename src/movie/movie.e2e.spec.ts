@@ -140,9 +140,9 @@ describe('MovieController (e2e)', () => {
 
   describe('[GET] /movie', () => {
     it('should get all movies', async () => {
-      const { body, statusCode, error } = await request(
-        app.getHttpServer(),
-      ).get('/movie');
+      const { body, statusCode, error } = await request(app.getHttpServer())
+        .get('/movie')
+        .query({ take: 5 });
 
       console.log(error);
 

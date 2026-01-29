@@ -12,6 +12,8 @@ import { Director } from 'src/director/entity/director.entity';
 import { Genre } from 'src/genre/entity/genre.entity';
 import { User } from 'src/user/entity/user.entity';
 import { MovieUserLike } from './entity/movie-user-like.entity';
+import { Chat } from 'src/chat/entity/chat.entity';
+import { ChatRoom } from 'src/chat/entity/chat-room.entity';
 import { MovieService } from './movie.service';
 import { CommonService } from 'src/common/common.service';
 import { DataSource } from 'typeorm';
@@ -40,7 +42,16 @@ describe('MovieService - Integration Test', () => {
           type: 'sqlite',
           database: ':memory:',
           dropSchema: true,
-          entities: [Movie, MovieDetail, Director, Genre, User, MovieUserLike],
+          entities: [
+            Movie,
+            MovieDetail,
+            Director,
+            Genre,
+            User,
+            MovieUserLike,
+            Chat,
+            ChatRoom,
+          ],
           synchronize: true,
           logging: false,
         }),
@@ -51,6 +62,8 @@ describe('MovieService - Integration Test', () => {
           Genre,
           User,
           MovieUserLike,
+          Chat,
+          ChatRoom,
         ]),
         ConfigModule.forRoot(),
       ],
@@ -60,14 +73,16 @@ describe('MovieService - Integration Test', () => {
     service = module.get<MovieService>(MovieService);
     cacheManager = module.get<Cache>(CACHE_MANAGER);
     dataSource = module.get<DataSource>(DataSource);
-  });
+  }, 10000);
 
   it('should be defined', () => {
     expect(service).toBeDefined();
   });
 
   afterAll(async () => {
-    await dataSource.destroy();
+    if (dataSource && dataSource.isInitialized) {
+      await dataSource.destroy();
+    }
   });
 
   beforeEach(async () => {
@@ -230,12 +245,25 @@ describe('MovieService - Integration Test', () => {
         genreIds: [genres[0].id],
       };
 
-      const result = await service.update(movieId, updateMovieDto);
+      const qr = dataSource.createQueryRunner();
+      await qr.connect();
+      await qr.startTransaction();
 
-      expect(result.title).toBe(updateMovieDto.title);
-      expect(result.detail.detail).toBe(updateMovieDto.detail);
-      expect(result.director.id).toBe(updateMovieDto.directorId);
-      expect(result.genres.map((x) => x.id)).toEqual(updateMovieDto.genreIds);
+      try {
+        const result = await service.update(movieId, updateMovieDto, qr);
+
+        expect(result.title).toBe(updateMovieDto.title);
+        expect(result.detail.detail).toBe(updateMovieDto.detail);
+        expect(result.director.id).toBe(updateMovieDto.directorId);
+        expect(result.genres.map((x) => x.id)).toEqual(updateMovieDto.genreIds);
+
+        await qr.commitTransaction();
+      } catch (e) {
+        await qr.rollbackTransaction();
+        throw e;
+      } finally {
+        await qr.release();
+      }
     });
 
     it('should throw error if movie does not exist', async () => {
@@ -243,9 +271,21 @@ describe('MovieService - Integration Test', () => {
         title: 'Change',
       };
 
-      await expect(service.update(9999999, updateMovieDto)).rejects.toThrow(
-        NotFoundException,
-      );
+      const qr = dataSource.createQueryRunner();
+      await qr.connect();
+      await qr.startTransaction();
+
+      try {
+        await expect(
+          service.update(9999999, updateMovieDto, qr),
+        ).rejects.toThrow(NotFoundException);
+        await qr.rollbackTransaction();
+      } catch (e) {
+        await qr.rollbackTransaction();
+        throw e;
+      } finally {
+        await qr.release();
+      }
     });
   });
 

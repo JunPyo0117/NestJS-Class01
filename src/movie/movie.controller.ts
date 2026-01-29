@@ -84,12 +84,14 @@ export class MovieController {
   ) {
     const session = request.session;
 
-    const movieCount = session.movieCount ?? {};
+    if (session) {
+      const movieCount = session.movieCount ?? {};
 
-    request.session.movieCount = {
-      ...movieCount,
-      [id]: movieCount[id] ? movieCount[id] + 1 : 1,
-    };
+      request.session.movieCount = {
+        ...movieCount,
+        [id]: movieCount[id] ? movieCount[id] + 1 : 1,
+      };
+    }
 
     console.log(session);
 

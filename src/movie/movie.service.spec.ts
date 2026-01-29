@@ -132,6 +132,7 @@ describe('MovieService', () => {
       expect(result).toEqual({
         data: movies,
         nextCursor: null,
+        hasNextPage: false,
         count: 1,
       });
     });
@@ -198,6 +199,7 @@ describe('MovieService', () => {
           },
         ],
         nextCursor: null,
+        hasNextPage: false,
         count: 1,
       });
     });
@@ -223,6 +225,7 @@ describe('MovieService', () => {
       expect(result).toEqual({
         data: movies,
         nextCursor: null,
+        hasNextPage: false,
         count: 1,
       });
     });
@@ -456,8 +459,12 @@ describe('MovieService', () => {
       ];
 
       (qr.connect as any).mockResolvedValue(null);
+      // 첫 번째: 영화 조회
       (qr.manager.findOne as any).mockResolvedValueOnce(movie);
+      // 두 번째: 감독 조회
       (qr.manager.findOne as any).mockResolvedValueOnce(director);
+      // 세 번째: 업데이트 후 영화 조회 (반환값)
+      (qr.manager.findOne as any).mockResolvedValueOnce(movie);
       jest.spyOn(movieRepository, 'findOne').mockResolvedValue(movie as Movie);
       (qr.manager.find as any).mockResolvedValueOnce(genres);
 
@@ -465,10 +472,9 @@ describe('MovieService', () => {
       updateMovieDetailMock.mockResolvedValue(undefined);
       updateMovieGenreRelationMock.mockResolvedValue(undefined);
 
-      const result = await movieService.update(1, updateMovieDto);
+      const result = await movieService.update(1, updateMovieDto, qr);
 
-      expect(qr.connect).toHaveBeenCalled();
-      expect(qr.startTransaction).toHaveBeenCalled();
+      // TransactionInterceptor가 트랜잭션을 관리하므로 connect/startTransaction은 인터셉터에서 호출됨
       expect(qr.manager.findOne).toHaveBeenCalledWith(Movie, {
         where: { id: 1 },
         relations: ['detail', 'genres'],
@@ -495,7 +501,12 @@ describe('MovieService', () => {
         genres,
         movie,
       );
-      expect(qr.commitTransaction).toHaveBeenCalled();
+      // 마지막: 업데이트 후 영화 조회 (반환값)
+      expect(qr.manager.findOne).toHaveBeenCalledWith(Movie, {
+        where: { id: 1 },
+        relations: ['detail', 'director', 'genres'],
+      });
+      // TransactionInterceptor가 트랜잭션을 관리하므로 여기서 커밋하지 않음
       expect(result).toEqual(movie);
     });
 
@@ -506,19 +517,18 @@ describe('MovieService', () => {
 
       (qr.manager.findOne as any).mockResolvedValue(null);
 
-      await expect(movieService.update(1, updateMovieDto)).rejects.toThrow(
+      await expect(movieService.update(1, updateMovieDto, qr)).rejects.toThrow(
         NotFoundException,
       );
 
-      expect(qr.connect).toHaveBeenCalled();
-      expect(qr.startTransaction).toHaveBeenCalled();
+      // TransactionInterceptor가 트랜잭션을 관리하므로 connect/startTransaction은 인터셉터에서 호출됨
       expect(qr.manager.findOne).toHaveBeenCalledWith(Movie, {
         where: {
           id: 1,
         },
         relations: ['detail', 'genres'],
       });
-      expect(qr.rollbackTransaction).toHaveBeenCalled();
+      // TransactionInterceptor가 트랜잭션을 관리하므로 여기서 롤백하지 않음
     });
 
     it('should throw NotFoundException if new director does not exist', async () => {
@@ -532,7 +542,7 @@ describe('MovieService', () => {
       (qr.manager.findOne as any).mockResolvedValueOnce(movie);
       (qr.manager.findOne as any).mockResolvedValueOnce(null);
 
-      await expect(movieService.update(1, updateMovieDto)).rejects.toThrow(
+      await expect(movieService.update(1, updateMovieDto, qr)).rejects.toThrow(
         NotFoundException,
       );
 
@@ -545,7 +555,7 @@ describe('MovieService', () => {
           id: updateMovieDto.directorId,
         },
       });
-      expect(qr.rollbackTransaction).toHaveBeenCalled();
+      // TransactionInterceptor가 트랜잭션을 관리하므로 여기서 롤백하지 않음
     });
 
     it('should throw NotFoundException if new genres do not exist', async () => {
@@ -564,7 +574,7 @@ describe('MovieService', () => {
         { id: 1, name: 'Genre1' },
       ]);
 
-      await expect(movieService.update(1, updateMoviesDto)).rejects.toThrow(
+      await expect(movieService.update(1, updateMoviesDto, qr)).rejects.toThrow(
         NotFoundException,
       );
 
@@ -577,7 +587,7 @@ describe('MovieService', () => {
           id: In(updateMoviesDto.genreIds),
         },
       });
-      expect(qr.rollbackTransaction).toHaveBeenCalled();
+      // TransactionInterceptor가 트랜잭션을 관리하므로 여기서 롤백하지 않음
     });
 
     it('should rollback transaction and rethrow error on failure', async () => {
@@ -589,17 +599,16 @@ describe('MovieService', () => {
         new Error('Database Error'),
       );
 
-      await expect(movieService.update(1, updateMovieDto)).rejects.toThrow(
+      await expect(movieService.update(1, updateMovieDto, qr)).rejects.toThrow(
         'Database Error',
       );
 
-      expect(qr.connect).toHaveBeenCalled();
-      expect(qr.startTransaction).toHaveBeenCalled();
+      // TransactionInterceptor가 트랜잭션을 관리하므로 connect/startTransaction은 인터셉터에서 호출됨
       expect(qr.manager.findOne).toHaveBeenCalledWith(Movie, {
         where: { id: 1 },
         relations: ['detail', 'genres'],
       });
-      expect(qr.rollbackTransaction).toHaveBeenCalled();
+      // TransactionInterceptor가 트랜잭션을 관리하므로 여기서 롤백하지 않음
     });
   });
 

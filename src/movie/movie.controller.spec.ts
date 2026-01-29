@@ -52,7 +52,8 @@ describe('MovieController', () => {
   describe('getMovie', () => {
     it('should call movieService.findOne with the correct id', async () => {
       const id = 1;
-      await movieController.getMovie(1);
+      const request = { session: null };
+      await movieController.getMovie(id, request);
 
       expect(movieService.findOne).toHaveBeenCalledWith(1);
     });
@@ -80,18 +81,19 @@ describe('MovieController', () => {
 
   describe('updateMovie', () => {
     it('should call movieService.update with the correct parameters', async () => {
-      const id = '1';
+      const id = 1;
       const body: UpdateMovieDto = { title: 'Updated Movie' };
+      const queryRunner = {} as QueryRunner;
 
-      await movieController.updateMovie(id, body);
+      await movieController.updateMovie(id, body, queryRunner);
 
-      expect(movieService.update).toHaveBeenCalledWith(1, body);
+      expect(movieService.update).toHaveBeenCalledWith(1, body, queryRunner);
     });
   });
 
   describe('deleteMovie', () => {
     it('should call movieService.remove with the correct id', async () => {
-      const id = '1';
+      const id = 1;
       await movieController.deleteMovie(id);
       expect(movieService.remove).toHaveBeenCalledWith(1);
     });

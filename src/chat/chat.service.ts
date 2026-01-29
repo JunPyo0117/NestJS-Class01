@@ -116,13 +116,13 @@ export class ChatService {
         throw new WsException('채팅방 생성에 실패했습니다.');
       }
 
-      const roomId = chatRoom.id;
+      // const roomId = chatRoom.id;
       [user.id, adminUser.id].forEach((userId) => {
         const client = this.connectedClients.get(userId);
 
         if (client) {
-          client.emit('roomCreated', roomId);
-          client.join(roomId.toString());
+          client.emit('roomCreated', chatRoom!.id);
+          client.join(chatRoom!.id.toString());
         }
       });
     }

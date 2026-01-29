@@ -4,7 +4,7 @@ import { UpdateGenreDto } from './dto/update-genre.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Genre } from './entity/genre.entity';
 import { Repository } from 'typeorm';
-import { PrismaService } from 'src/common/prisma.service';
+// import { PrismaService } from 'src/common/prisma.service';
 // import { InjectModel } from '@nestjs/mongoose';
 // import { Model } from 'mongoose';
 // import { Genre } from './schema/genre.schema';
@@ -14,7 +14,7 @@ export class GenreService {
   constructor(
     @InjectRepository(Genre)
     private readonly genreRepository: Repository<Genre>,
-    private readonly prismaService: PrismaService,
+    // private readonly prismaService: PrismaService,
     // @InjectModel(Genre.name)
     // private readonly genreModel: Model<Genre>,
   ) {}

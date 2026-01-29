@@ -240,6 +240,7 @@ export class MovieService {
         })),
         nextCursor,
         hasNextPage,
+        count,
       };
       // return {
       //   data: movies.map((movie) => ({
@@ -256,6 +257,13 @@ export class MovieService {
       //   hasNextPage,
       // }
     }
+
+    return {
+      data,
+      nextCursor,
+      hasNextPage,
+      count,
+    };
 
     return {
       data,
@@ -757,20 +765,17 @@ export class MovieService {
         await this.updateMovieGenreRelation(qr, id, newGenres, movie);
       }
 
-      await qr.commitTransaction();
-
-      return this.movieRepository.findOne({
+      // TransactionInterceptor가 트랜잭션을 관리하므로 여기서 커밋하지 않음
+      // 트랜잭션 내에서 조회하여 변경사항이 반영된 결과를 반환
+      return qr.manager.findOne(Movie, {
         where: {
           id,
         },
         relations: ['detail', 'director', 'genres'],
       });
     } catch (e) {
-      await qr.rollbackTransaction();
-
+      // TransactionInterceptor가 롤백을 관리하므로 여기서 롤백하지 않음
       throw e;
-    } finally {
-      await qr.release();
     }
 
     // return this.prisma.$transaction(async (prisma) => {
@@ -1002,7 +1007,9 @@ export class MovieService {
     //     id: movie.detail.id,
     //   }
     // })
-    await this.movieDetailRepository.delete(movie.detail.id);
+    await this.movieDetailRepository.delete({
+      id: movie.detail.id,
+    });
 
     return id;
   }
@@ -1029,6 +1036,7 @@ export class MovieService {
       where: {
         id: movieId,
       },
+      relations: ['likedUsers'],
     });
 
     if (!movie) {
