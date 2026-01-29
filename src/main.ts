@@ -51,6 +51,13 @@ async function bootstrap() {
     }),
   );
 
+  const isWorker = process.env.TYPE === 'worker';
+  if (isWorker) {
+    // 워커는 HTTP 서버 없이 BullMQ 프로세서만 실행 (같은 인스턴스에서 web이 8080 사용)
+    await app.init();
+    return app;
+  }
+
   await app.listen(process.env.PORT ?? 3000);
 }
 bootstrap();
