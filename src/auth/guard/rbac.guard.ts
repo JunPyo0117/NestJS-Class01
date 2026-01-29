@@ -32,7 +32,8 @@ export class RBACGuard implements CanActivate {
       throw new ForbiddenException('사용자 정보를 찾을 수 없습니다.');
     }
 
-    if (!user.role) {
+    // Role.admin === 0 이므로 !user.role만 쓰면 admin이 거부됨
+    if (user.role === undefined || user.role === null) {
       throw new ForbiddenException('사용자 권한 정보가 없습니다.');
     }
 
