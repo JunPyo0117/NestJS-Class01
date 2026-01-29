@@ -110,12 +110,6 @@ jobs:
       - name: Run Tests
         run: npm run test
 
-      - name: Install TypeORM
-        run: npm i -g typeorm
-
-      - name: Run Migrations
-        run: typeorm migration:run -d dist/database/data-source.js
-
       - name: Zip Artifacts For Deployment
         run: zip -r deploy.zip .
 
