@@ -7,8 +7,8 @@ import {
 import { AuthService } from '../auth.service';
 import { Reflector } from '@nestjs/core';
 import { RBAC } from '../decorator/rbac.decorator';
-// import { Role } from 'src/user/entity/user.entity';
-import { Role } from '@prisma/client';
+import { Role } from 'src/user/entity/user.entity';
+// import { Role } from '@prisma/client';
 
 @Injectable()
 export class RBACGuard implements CanActivate {

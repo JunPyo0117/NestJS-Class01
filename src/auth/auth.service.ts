@@ -13,8 +13,8 @@ import { JwtService } from '@nestjs/jwt';
 import { envVariableKeys } from 'src/common/const/env.const';
 import { CACHE_MANAGER, Cache } from '@nestjs/cache-manager';
 import { UserService } from 'src/user/user.service';
-import { PrismaService } from 'src/common/prisma.service';
-import { PrismaClient } from '@prisma/client';
+// import { PrismaService } from 'src/common/prisma.service';
+// import { PrismaClient } from '@prisma/client';
 // import { User } from 'src/user/schema/user.schema';
 // import { InjectModel } from '@nestjs/mongoose';
 // import { Model } from 'mongoose';
@@ -120,7 +120,7 @@ export class AuthService {
 
   // rawToken: Basic $token
   async register(rawToken: string) {
-    const { email, password } = this.parseBasicToken(rawToken); 
+    const { email, password } = this.parseBasicToken(rawToken);
 
     return this.userService.create({ email, password });
   }
