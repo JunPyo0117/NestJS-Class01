@@ -49,19 +49,27 @@ export default function Upload() {
     try {
       const { url, key } = await getPresignedUrl();
       setStatus('S3에 업로드 중...');
-      await fetch(url, {
+      const putRes = await fetch(url, {
         method: 'PUT',
         body: file,
         headers: { 'Content-Type': 'video/mp4' },
       });
+      if (!putRes.ok) {
+        const body = await putRes.text();
+        const detail = body ? `${putRes.status}: ${body.slice(0, 200)}` : `HTTP ${putRes.status}`;
+        throw new Error(`S3 업로드 실패 (${detail}). 버킷 CORS 설정을 확인하세요.`);
+      }
       setStatus('썸네일 생성 트리거 중...');
       await triggerThumbnail(key);
       setStatus(`완료. key: ${key}. 썸네일은 백그라운드에서 생성됩니다.`);
     } catch (e: unknown) {
-      const msg = e && typeof e === 'object' && 'response' in e
-        ? (e as { response?: { data?: { message?: string } } }).response?.data?.message
-        : '업로드 실패';
-      setError(Array.isArray(msg) ? msg[0] : msg ?? '업로드 실패');
+      const msg =
+        e instanceof Error
+          ? e.message
+          : e && typeof e === 'object' && 'response' in e
+            ? (e as { response?: { data?: { message?: string } } }).response?.data?.message
+            : '업로드 실패';
+      setError(Array.isArray(msg) ? msg[0] : String(msg ?? '업로드 실패'));
       setStatus('');
     }
   };

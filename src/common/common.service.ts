@@ -33,8 +33,10 @@ export class CommonService {
           envVariableKeys.awsSecretAccessKey,
         ),
       },
-
       region: this.configService.get<string>(envVariableKeys.awsRegion),
+      // Presigned URL로 브라우저에서 직접 업로드 시 클라이언트가 체크섬을 보내지 않으므로,
+      // 체크섬을 서명에 넣지 않도록 WHEN_REQUIRED로 설정 (기본값 WHEN_SUPPORTED는 CRC32 포함 → 403)
+      requestChecksumCalculation: 'WHEN_REQUIRED' as const,
     });
   }
 
