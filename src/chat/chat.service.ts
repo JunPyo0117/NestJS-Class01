@@ -131,4 +131,28 @@ export class ChatService {
 
     return chatRoom;
   }
+
+  /** 관리자: 모든 채팅방 목록 (참여 유저 포함) */
+  async getRoomsForAdmin() {
+    return this.chatRoomRepository.find({
+      relations: ['users'],
+      order: { id: 'ASC' },
+    });
+  }
+
+  /** 채팅방 메시지 목록 (관리자 또는 해당 방 참여자만) */
+  async getMessagesByRoomId(roomId: number, userId: number, isAdmin: boolean) {
+    const room = await this.chatRoomRepository.findOne({
+      where: { id: roomId },
+      relations: ['users'],
+    });
+    if (!room) return [];
+    const isParticipant = room.users.some((u) => u.id === userId);
+    if (!isAdmin && !isParticipant) return [];
+    return this.chatRepository.find({
+      where: { chatRoom: { id: roomId } },
+      relations: ['author', 'chatRoom'],
+      order: { createdAt: 'ASC' },
+    });
+  }
 }
