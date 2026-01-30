@@ -73,9 +73,11 @@ export class ChatService {
     const client = this.connectedClients.get(user.id);
 
     if (client) {
-      client
-        .to(chatRoom.id.toString())
-        .emit('newMessage', plainToClass(Chat, msgModel));
+      const payload = {
+        ...plainToClass(Chat, msgModel),
+        chatRoom: { id: chatRoom.id },
+      };
+      client.to(chatRoom.id.toString()).emit('newMessage', payload);
     }
 
     return message;

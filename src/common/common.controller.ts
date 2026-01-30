@@ -58,21 +58,15 @@ export class CommonController {
     }),
   )
   async createVideo(@UploadedFile() movie: Express.Multer.File) {
-    await this.thumbnailQueue.add(
-      'thumbnail',
-      {
-        videoId: movie.filename,
-        videoPath: movie.path,
-      },
-      // {
-      //   priority: 1,
-      //   delay: 100,
-      //   attempts: 3,
-      //   lifo: true,
-      //   removeOnComplete: true,
-      //   removeOnFail: true,
-      // },
-    );
+    if (!movie?.filename) {
+      throw new BadGatewayException(
+        '업로드된 파일이 없습니다. 필드명은 "video"이고, Content-Type은 multipart/form-data여야 합니다.',
+      );
+    }
+    await this.thumbnailQueue.add('thumbnail', {
+      videoId: movie.filename,
+      videoPath: movie.path,
+    });
 
     return {
       filename: movie.filename,

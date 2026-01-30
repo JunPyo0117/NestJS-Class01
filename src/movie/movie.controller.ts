@@ -45,7 +45,7 @@ export class MovieController {
 
   @Get()
   @Public()
-  @Throttle({ count: 5, unit: 'minute', ttl: 60000 })
+  @Throttle({ count: 60, unit: 'minute', ttl: 60000 })
   // @UseInterceptors(CacheInterceptor) // 캐시 확인용
   @ApiOperation({ description: '[Movie]를 페이지네이션 하는 API' })
   @ApiResponse({ status: 200, description: '영화 목록 조회 성공' })
@@ -79,8 +79,8 @@ export class MovieController {
   getMovie(
     @Param('id', ParseIntPipe)
     id: number,
-    // @Param('id') id: string,
     @Req() request: any,
+    @UserId() userId?: string,
   ) {
     const session = request.session;
 
@@ -93,10 +93,7 @@ export class MovieController {
       };
     }
 
-    console.log(session);
-
-    return this.movieService.findOne(id);
-    // return this.movieService.findOne(id);
+    return this.movieService.findOne(id, userId ? +userId : undefined);
   }
 
   @Post()

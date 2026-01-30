@@ -1,0 +1,30 @@
+@import "tailwindcss";
+
+/* Tailwind가 스캔할 소스 (스타일시트 기준, 모노레포/루트 실행 시 필요) */
+@source "./**/*.{tsx,ts,jsx,js}";
+
+@theme {
+  --color-bg: #141414;
+  --color-card: #1f1f1f;
+  --color-muted: #808080;
+  --color-accent: #e50914;
+  --color-accent-hover: #f40612;
+}
+
+@layer base {
+  body {
+    @apply min-h-screen bg-[var(--color-bg)] text-[#e5e5e5] antialiased;
+  }
+  a {
+    @apply text-[var(--color-accent)] no-underline;
+  }
+  a:hover {
+    @apply underline;
+  }
+  input, button, select, textarea {
+    @apply text-inherit;
+  }
+  button {
+    @apply cursor-pointer;
+  }
+}

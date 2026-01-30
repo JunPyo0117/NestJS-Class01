@@ -55,11 +55,15 @@ export class Movie extends BaseTable {
   detail: MovieDetail;
 
   @Column()
-  @Transform(({ value }) =>
-    process.env.ENV === 'prod'
-      ? `http://${process.env.BUCKET_NAME}.s3.${process.env.AWS_REGION}.amazonaws.com/${value}`
-      : `http://localhost:3000/${value})`,
-  )
+  @Transform(({ value }) => {
+    if (!value) return value;
+    if (process.env.ENV === 'prod') {
+      const bucket = process.env.BUCKET_NAME ?? '';
+      const region = process.env.AWS_REGION ?? 'ap-northeast-2';
+      return `https://${bucket}.s3.${region}.amazonaws.com/${value}`;
+    }
+    return `http://localhost:3000/${value}`;
+  })
   movieFilePath: string;
 
   @ManyToOne(() => Director, (director) => director.id, {

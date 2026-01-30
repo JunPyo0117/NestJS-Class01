@@ -31,9 +31,21 @@ import { MovieUserLike } from './entity/movie-user-like.entity';
 
 type TFunction = (x: number, y: number) => number;
 
-const fun4: TFunction = function (x) {
+    const fun4: TFunction = function (x) {
   return x;
 };
+
+/** DB 경로(public/movie/xxx.mp4)를 목록/상세 응답용 전체 URL로 변환. 썸네일은 프론트에서 같은 base + public/thumbnail/xxx.png 로 요청 */
+function toFullMediaUrl(path: string | undefined): string {
+  if (!path?.trim()) return path ?? '';
+  const value = path.replace(/\)$/, '').trim();
+  if (process.env.ENV === 'prod') {
+    const bucket = process.env.BUCKET_NAME ?? '';
+    const region = process.env.AWS_REGION ?? 'ap-northeast-2';
+    return `https://${bucket}.s3.${region}.amazonaws.com/${value}`;
+  }
+  return `http://localhost:3000/${value}`;
+}
 
 @Injectable()
 export class MovieService {
@@ -235,7 +247,7 @@ export class MovieService {
       return {
         data: data.map((x) => ({
           ...x,
-          /// null || true || false
+          movieFilePath: toFullMediaUrl(x.movieFilePath),
           likeStatus: x.id in likedMovieMap ? likedMovieMap[x.id] : null,
         })),
         nextCursor,
@@ -259,16 +271,13 @@ export class MovieService {
     }
 
     return {
-      data,
+      data: data.map((x) => ({
+        ...x,
+        movieFilePath: toFullMediaUrl(x.movieFilePath),
+      })),
       nextCursor,
       hasNextPage,
       count,
-    };
-
-    return {
-      data,
-      nextCursor,
-      hasNextPage,
     };
   }
 
@@ -284,20 +293,24 @@ export class MovieService {
       .getOne();
   }
 
-  async findOne(id: number) {
-    // const movie = await this.movieModel.findById(id);
-    // const movie = await this.prisma.movie.findUnique({
-    //   where: {
-    //     id,
-    //   }
-    // });
+  async findOne(id: number, userId?: number) {
     const movie = await this.findMovieDetail(id);
 
     if (!movie) {
       throw new NotFoundException('존재하지 않는 ID의 영화입니다!');
     }
 
-    return movie;
+    let likeStatus: boolean | null = null;
+    if (userId) {
+      const record = await this.getLikedRecord(id, userId);
+      likeStatus = record ? record.isLike : null;
+    }
+
+    return {
+      ...movie,
+      movieFilePath: toFullMediaUrl(movie.movieFilePath),
+      likeStatus,
+    };
   }
 
   /* istanbul ignore next */
@@ -1073,30 +1086,37 @@ export class MovieService {
 
     if (likeRecord) {
       if (isLike === likeRecord.isLike) {
-        // await this.movieUserLikeModel.findByIdAndDelete(likeRecord._id);
-        // await this.prisma.movieUserLike.delete({
-        //   where: {
-        //     movieId_userId: { movieId, userId }
-        //   }
-        // })
+        // 기존 좋아요/싫어요 취소 → Movie 카운트 감소
+        if (likeRecord.isLike) {
+          await this.movieRepository.decrement({ id: movieId }, 'likeCount', 1);
+        } else {
+          await this.movieRepository.decrement(
+            { id: movieId },
+            'dislikeCount',
+            1,
+          );
+        }
         await this.movieUserLikeRepository.delete({
           movie,
           user,
         });
       } else {
-        // likeRecord.isLike = isLike;
-        // likeRecord.save();
-        // await this.movieUserLikeModel.findByIdAndUpdate(likeRecord._id, {
-        //   isLike,
-        // })
-        // await this.prisma.movieUserLike.update({
-        //   where: {
-        //     movieId_userId: { movieId, userId }
-        //   },
-        //   data: {
-        //     isLike,
-        //   }
-        // })
+        // 좋아요 ↔ 싫어요 전환 → 기존 카운트 감소, 새 카운트 증가
+        if (likeRecord.isLike) {
+          await this.movieRepository.decrement({ id: movieId }, 'likeCount', 1);
+          await this.movieRepository.increment(
+            { id: movieId },
+            'dislikeCount',
+            1,
+          );
+        } else {
+          await this.movieRepository.decrement(
+            { id: movieId },
+            'dislikeCount',
+            1,
+          );
+          await this.movieRepository.increment({ id: movieId }, 'likeCount', 1);
+        }
         await this.movieUserLikeRepository.update(
           {
             movie,
@@ -1108,18 +1128,16 @@ export class MovieService {
         );
       }
     } else {
-      // await this.movieUserLikeModel.create({
-      //   movie: new Types.ObjectId(movieId),
-      //   user: new Types.ObjectId(userId),
-      //   isLike,
-      // })
-      // await this.prisma.movieUserLike.create({
-      //   data: {
-      //     movie: { connect: { id: movieId } },
-      //     user: { connect: { id: userId } },
-      //     isLike,
-      //   },
-      // })
+      // 새로 좋아요/싫어요 → Movie 카운트 증가
+      if (isLike) {
+        await this.movieRepository.increment({ id: movieId }, 'likeCount', 1);
+      } else {
+        await this.movieRepository.increment(
+          { id: movieId },
+          'dislikeCount',
+          1,
+        );
+      }
       await this.movieUserLikeRepository.save({
         movie,
         user,
@@ -1137,6 +1155,21 @@ export class MovieService {
     //   }
     // })
     const result = await this.getLikedRecord(movieId, userId);
+
+    // likeCount/dislikeCount가 음수로 내려가지 않도록 보정 (기존 데이터/동시 요청 등)
+    const updated = await this.movieRepository.findOne({
+      where: { id: movieId },
+      select: ['id', 'likeCount', 'dislikeCount'],
+    });
+    if (updated && (updated.likeCount < 0 || updated.dislikeCount < 0)) {
+      await this.movieRepository.update(
+        { id: movieId },
+        {
+          likeCount: Math.max(0, updated.likeCount),
+          dislikeCount: Math.max(0, updated.dislikeCount),
+        },
+      );
+    }
 
     return {
       isLike: result && result.isLike,

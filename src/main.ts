@@ -1,4 +1,5 @@
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { AppModule } from './app.module';
 import { ValidationPipe, VersioningType } from '@nestjs/common';
 import { WINSTON_MODULE_NEST_PROVIDER } from 'nest-winston';
@@ -7,15 +8,19 @@ import * as ffmpeg from '@ffmpeg-installer/ffmpeg';
 import * as ffmpegFluent from 'fluent-ffmpeg';
 import * as ffprobe from 'ffprobe-static';
 import session from 'express-session';
+import { join } from 'path';
 
 ffmpegFluent.setFfmpegPath(ffmpeg.path);
 ffmpegFluent.setFfprobePath(ffprobe.path);
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, {
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, {
     logger: ['verbose'],
   });
-  // app.setGlobalPrefix('v1'); // v1/movies, v1/directors, v1/genres, v1/users, v1/auth 글로벌
+
+  // EB 배포 시 API는 /api 아래로 (프론트 정적 서빙과 분리)
+  app.setGlobalPrefix('api');
+
   const config = new DocumentBuilder()
     .setTitle('Netflix API')
     .setDescription('Netflix API Description')
@@ -37,6 +42,7 @@ async function bootstrap() {
     new ValidationPipe({
       whitelist: true,
       forbidNonWhitelisted: true,
+      transform: true,
       transformOptions: {
         enableImplicitConversion: true,
       },
@@ -50,6 +56,26 @@ async function bootstrap() {
       // saveUninitialized: false, // 초기화되지 않은 세션 저장 안 함
     }),
   );
+
+  // 프론트엔드(frontend/)가 다른 도메인에서 API 호출 시 필요
+  app.enableCors({ origin: true, credentials: true });
+
+  // EB 배포: 프론트 빌드(public/client)가 있으면 SPA 폴백 (API·정적 제외 경로 → index.html)
+  if (process.env.ENV === 'prod') {
+    const clientPath = join(process.cwd(), 'public', 'client', 'index.html');
+    app.use((req, res, next) => {
+      if (
+        req.method === 'GET' &&
+        !req.path.startsWith('/api') &&
+        !req.path.startsWith('/socket.io') &&
+        !req.path.startsWith('/public') &&
+        !req.path.startsWith('/doc')
+      ) {
+        return res.sendFile(clientPath);
+      }
+      next();
+    });
+  }
 
   const isWorker = process.env.TYPE === 'worker';
   if (isWorker) {

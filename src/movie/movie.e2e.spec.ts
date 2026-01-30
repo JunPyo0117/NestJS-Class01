@@ -30,6 +30,7 @@ describe('MovieController (e2e)', () => {
     }).compile();
 
     app = moduleFixture.createNestApplication();
+    app.setGlobalPrefix('api');
     app.useGlobalPipes(
       new ValidationPipe({
         whitelist: true,
@@ -141,7 +142,7 @@ describe('MovieController (e2e)', () => {
   describe('[GET] /movie', () => {
     it('should get all movies', async () => {
       const { body, statusCode, error } = await request(app.getHttpServer())
-        .get('/movie')
+        .get('/api/movie')
         .query({ take: 5 });
 
       console.log(error);
@@ -158,7 +159,7 @@ describe('MovieController (e2e)', () => {
   describe('[GET] /movie/recent', () => {
     it('should get recent movies', async () => {
       const { body, statusCode, error } = await request(app.getHttpServer())
-        .get('/movie/recent')
+        .get('/api/movie/recent')
         .set('authorization', `Bearer ${token}`);
 
       expect(statusCode).toBe(200);
@@ -171,7 +172,7 @@ describe('MovieController (e2e)', () => {
       const movieId = movies[0].id;
 
       const { body, statusCode, error } = await request(app.getHttpServer())
-        .get(`/movie/${movieId}`)
+        .get(`/api/movie/${movieId}`)
         .set('authorization', `Bearer ${token}`);
 
       expect(statusCode).toBe(200);
@@ -182,7 +183,7 @@ describe('MovieController (e2e)', () => {
       const movieId = 9999999;
 
       const { body, statusCode, error } = await request(app.getHttpServer())
-        .get(`/movie/${movieId}`)
+        .get(`/api/movie/${movieId}`)
         .set('authorization', `Bearer ${token}`);
 
       expect(statusCode).toBe(404);
@@ -194,7 +195,7 @@ describe('MovieController (e2e)', () => {
       const {
         body: { filename },
       } = await request(app.getHttpServer())
-        .post(`/common/video`)
+        .post(`/api/common/video`)
         .set('authorization', `Bearer ${token}`)
         .attach('video', Buffer.from('test'), 'movie.mp4')
         .expect(201);
@@ -208,7 +209,7 @@ describe('MovieController (e2e)', () => {
       };
 
       const { body, statusCode } = await request(app.getHttpServer())
-        .post(`/movie`)
+        .post(`/api/movie`)
         .set('authorization', `Bearer ${token}`)
         .send(dto);
 
@@ -235,7 +236,7 @@ describe('MovieController (e2e)', () => {
       const movieId = movies[0].id;
 
       const { body, statusCode } = await request(app.getHttpServer())
-        .patch(`/movie/${movieId}`)
+        .patch(`/api/movie/${movieId}`)
         .set('authorization', `Bearer ${token}`)
         .send(dto);
 
@@ -254,7 +255,7 @@ describe('MovieController (e2e)', () => {
       const movieId = movies[0].id;
 
       const { body, statusCode } = await request(app.getHttpServer())
-        .delete(`/movie/${movieId}`)
+        .delete(`/api/movie/${movieId}`)
         .set('authorization', `Bearer ${token}`);
 
       expect(statusCode).toBe(200);
@@ -264,7 +265,7 @@ describe('MovieController (e2e)', () => {
       const movieId = 99999;
 
       const { statusCode } = await request(app.getHttpServer())
-        .delete(`/movie/${movieId}`)
+        .delete(`/api/movie/${movieId}`)
         .set('authorization', `Bearer ${token}`);
 
       expect(statusCode).toBe(404);
@@ -276,7 +277,7 @@ describe('MovieController (e2e)', () => {
       const movieId = movies[1].id;
 
       const { statusCode, body } = await request(app.getHttpServer())
-        .post(`/movie/${movieId}/like`)
+        .post(`/api/movie/${movieId}/like`)
         .set('authorization', `Bearer ${token}`);
 
       expect(statusCode).toBe(201);
@@ -289,7 +290,7 @@ describe('MovieController (e2e)', () => {
       const movieId = movies[1].id;
 
       const { statusCode, body } = await request(app.getHttpServer())
-        .post(`/movie/${movieId}/like`)
+        .post(`/api/movie/${movieId}/like`)
         .set('authorization', `Bearer ${token}`);
 
       expect(statusCode).toBe(201);
@@ -304,7 +305,7 @@ describe('MovieController (e2e)', () => {
       const movieId = movies[1].id;
 
       const { statusCode, body } = await request(app.getHttpServer())
-        .post(`/movie/${movieId}/dislike`)
+        .post(`/api/movie/${movieId}/dislike`)
         .set('authorization', `Bearer ${token}`);
 
       expect(statusCode).toBe(201);
@@ -317,7 +318,7 @@ describe('MovieController (e2e)', () => {
       const movieId = movies[1].id;
 
       const { statusCode, body } = await request(app.getHttpServer())
-        .post(`/movie/${movieId}/dislike`)
+        .post(`/api/movie/${movieId}/dislike`)
         .set('authorization', `Bearer ${token}`);
 
       expect(statusCode).toBe(201);

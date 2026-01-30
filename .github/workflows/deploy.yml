@@ -95,6 +95,17 @@ jobs:
       - name: Install dependencies
         run: npm i
 
+      - name: Build Frontend (for EB static serving)
+        run: |
+          cd frontend
+          npm ci 2>/dev/null || npm i
+          VITE_API_BASE=/api npm run build
+          cd ..
+          mkdir -p public/client
+          cp -r frontend/dist/* public/client/
+          echo "Frontend built and copied to public/client"
+          ls -la public/client
+
       - name: Build Project
         run: npm run build
 

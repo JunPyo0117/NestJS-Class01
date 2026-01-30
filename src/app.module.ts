@@ -98,10 +98,17 @@ import { WorkerModule } from './worker/worker.module';
       }),
       inject: [ConfigService],
     }),
-    ServeStaticModule.forRoot({
-      rootPath: join(process.cwd(), 'public'),
-      serveRoot: '/public',
-    }),
+    ServeStaticModule.forRoot(
+      {
+        rootPath: join(process.cwd(), 'public'),
+        serveRoot: '/public',
+      },
+      {
+        rootPath: join(process.cwd(), 'public', 'client'),
+        serveRoot: '/',
+        serveStaticOptions: { index: 'index.html' },
+      },
+    ),
     WinstonModule.forRoot({
       level: 'debug',
       transports: [

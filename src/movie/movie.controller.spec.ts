@@ -50,12 +50,12 @@ describe('MovieController', () => {
   });
 
   describe('getMovie', () => {
-    it('should call movieService.findOne with the correct id', async () => {
+    it('should call movieService.findOne with id and optional userId', async () => {
       const id = 1;
       const request = { session: null };
-      await movieController.getMovie(id, request);
+      await movieController.getMovie(id, request, undefined);
 
-      expect(movieService.findOne).toHaveBeenCalledWith(1);
+      expect(movieService.findOne).toHaveBeenCalledWith(1, undefined);
     });
   });
 
