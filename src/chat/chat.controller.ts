@@ -14,6 +14,13 @@ import { UserId } from 'src/user/decorator/user-id.decorator';
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
+  @Get('rooms/me')
+  @ApiOperation({ description: '일반 사용자: 내 채팅방 ID (없으면 null)' })
+  async getMyRoom(@UserId() userId: number) {
+    const room = await this.chatService.getMyRoom(userId);
+    return { roomId: room?.id ?? null };
+  }
+
   @Get('rooms')
   @UseGuards(RBACGuard)
   @RBAC(Role.admin)

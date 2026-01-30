@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { io, Socket } from 'socket.io-client';
 import { useAuth } from '@/context/AuthContext';
-import { getChatRooms, getChatRoomMessages, type ChatRoomWithUsers } from '@/api/chat';
+import { getChatRooms, getChatRoomMessages, getMyChatRoom, type ChatRoomWithUsers } from '@/api/chat';
 import type { ChatMessage } from '@/types';
 import { Role } from '@/types';
 
@@ -79,6 +79,20 @@ export default function Chat() {
       .then(setRooms)
       .catch(() => setRooms([]));
   }, [isAdmin, connected]);
+
+  // 일반 사용자: 이미 만든 채팅방이 있으면 roomId 설정 후 메시지 로드
+  useEffect(() => {
+    if (isAdmin || !connected || roomId !== '') return;
+    getMyChatRoom()
+      .then(({ roomId: myRoomId }) => {
+        if (myRoomId != null) {
+          setRoomId(myRoomId);
+          setSelectedRoomId(myRoomId);
+          getChatRoomMessages(myRoomId).then(setMessages).catch(() => setMessages([]));
+        }
+      })
+      .catch(() => {});
+  }, [isAdmin, connected, roomId]);
 
   // 선택한 방(또는 유저의 방) 메시지 히스토리 로드
   const effectiveRoomId = isAdmin ? selectedRoomId : (roomId === '' ? null : roomId);

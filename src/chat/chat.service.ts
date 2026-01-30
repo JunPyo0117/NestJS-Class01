@@ -132,6 +132,15 @@ export class ChatService {
     return chatRoom;
   }
 
+  /** 일반 사용자: 내가 참여 중인 채팅방 1개 (문의용 1:1 방) */
+  async getMyRoom(userId: number) {
+    const room = await this.chatRoomRepository
+      .createQueryBuilder('chatRoom')
+      .innerJoin('chatRoom.users', 'user', 'user.id = :userId', { userId })
+      .getOne();
+    return room;
+  }
+
   /** 관리자: 모든 채팅방 목록 (참여 유저 포함) */
   async getRoomsForAdmin() {
     return this.chatRoomRepository.find({
