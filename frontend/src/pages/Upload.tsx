@@ -102,7 +102,16 @@ export default function Upload() {
           </p>
         )}
       </div>
-      {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
+      {error && (
+        <div className="mb-2">
+          <p className="text-red-500 text-sm">{error}</p>
+          {error.includes('S3 요청이 차단') && (
+            <p className="text-muted text-xs mt-1">
+              S3 CORS에 아래 주소가 정확히 들어가 있어야 합니다: <code className="bg-neutral-700 px-1 rounded">{typeof window !== 'undefined' ? window.location.origin : ''}</code>
+            </p>
+          )}
+        </div>
+      )}
       {status && <p className="text-emerald-400 text-sm mb-2">{status}</p>}
       <div className="flex gap-2 mt-4">
         <button
