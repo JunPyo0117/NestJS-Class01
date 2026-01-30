@@ -5,7 +5,9 @@ import {
   OnGatewayDisconnect,
   SubscribeMessage,
   WebSocketGateway,
+  WebSocketServer,
 } from '@nestjs/websockets';
+import { Server } from 'socket.io';
 import { ChatService } from './chat.service';
 import { Socket } from 'socket.io';
 import { AuthService } from 'src/auth/auth.service';
@@ -17,6 +19,9 @@ import { CreateChatDto } from './dto/create-chat.dto';
 
 @WebSocketGateway()
 export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  @WebSocketServer()
+  server!: Server;
+
   constructor(
     private readonly chatService: ChatService,
     private readonly authService: AuthService,
@@ -60,7 +65,12 @@ export class ChatGateway implements OnGatewayConnection, OnGatewayDisconnect {
     @WsQueryRunner() qr: QueryRunner,
   ) {
     const payload = client.data.user;
-    await this.chatService.createMessage(payload, body, qr);
+    const result = await this.chatService.createMessage(payload, body, qr);
+    if (result?.messagePayload && result?.roomId != null) {
+      this.server
+        .to(result.roomId.toString())
+        .emit('newMessage', result.messagePayload);
+    }
   }
 
   // @SubscribeMessage('receiveMessage')

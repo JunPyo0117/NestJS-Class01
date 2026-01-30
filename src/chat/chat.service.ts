@@ -70,17 +70,11 @@ export class ChatService {
       chatRoom,
     });
 
-    const client = this.connectedClients.get(user.id);
-
-    if (client) {
-      const payload = {
-        ...plainToClass(Chat, msgModel),
-        chatRoom: { id: chatRoom.id },
-      };
-      client.to(chatRoom.id.toString()).emit('newMessage', payload);
-    }
-
-    return message;
+    const messagePayload = {
+      ...plainToClass(Chat, msgModel),
+      chatRoom: { id: chatRoom.id },
+    };
+    return { messagePayload, roomId: chatRoom.id };
   }
 
   async getOrCreateChatRoom(user: User, qr: QueryRunner, room?: number) {
