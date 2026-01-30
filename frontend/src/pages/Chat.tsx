@@ -60,6 +60,10 @@ export default function Chat() {
     socket.on('roomCreated', (id: number) => {
       setRoomId(id);
       setSelectedRoomId(id);
+      // 관리자: 새 채팅방이 생겼으므로 목록 다시 불러와서 다른 방 선택 가능하게
+      if (user?.role === Role.admin) {
+        getChatRooms().then(setRooms).catch(() => {});
+      }
       // 일반 사용자: 백엔드 트랜잭션 커밋 후 히스토리가 보이도록 짧은 지연 후 조회
       setTimeout(() => {
         getChatRoomMessages(id).then(setMessages).catch(() => setMessages([]));
@@ -131,7 +135,16 @@ export default function Chat() {
 
       {isAdmin && (
         <div className="mb-4">
-          <p className="text-sm font-medium text-[#e5e5e5] mb-2">채팅방 선택</p>
+          <div className="flex items-center gap-2 mb-2">
+            <p className="text-sm font-medium text-[#e5e5e5]">채팅방 선택</p>
+            <button
+              type="button"
+              onClick={() => getChatRooms().then(setRooms).catch(() => setRooms([]))}
+              className="text-xs px-2 py-1 rounded border border-neutral-600 bg-card text-muted hover:bg-neutral-700 hover:text-[#e5e5e5]"
+            >
+              목록 새로고침
+            </button>
+          </div>
           <div className="flex flex-wrap gap-2">
             {rooms.length === 0 && connected && <span className="text-muted text-sm">채팅방이 없습니다.</span>}
             {rooms.map((room) => (
