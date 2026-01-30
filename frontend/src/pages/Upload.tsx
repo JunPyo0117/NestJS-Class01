@@ -63,13 +63,13 @@ export default function Upload() {
       await triggerThumbnail(key);
       setStatus(`완료. key: ${key}. 썸네일은 백그라운드에서 생성됩니다.`);
     } catch (e: unknown) {
-      let msg =
+      const raw =
         e instanceof Error
           ? e.message
           : e && typeof e === 'object' && 'response' in e
-            ? (e as { response?: { data?: { message?: string } } }).response?.data?.message
+            ? (e as { response?: { data?: { message?: string | string[] } } }).response?.data?.message
             : '업로드 실패';
-      msg = Array.isArray(msg) ? msg[0] : String(msg ?? '업로드 실패');
+      let msg: string = Array.isArray(raw) ? (raw[0] ?? '업로드 실패') : String(raw ?? '업로드 실패');
       // 브라우저에서 S3로 요청이 막히면 "Failed to fetch" → 반드시 S3 버킷(백엔드 아님) CORS 설정
       if (msg === 'Failed to fetch' || msg.includes('NetworkError')) {
         msg =
