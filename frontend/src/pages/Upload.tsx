@@ -70,10 +70,10 @@ export default function Upload() {
             ? (e as { response?: { data?: { message?: string } } }).response?.data?.message
             : '업로드 실패';
       msg = Array.isArray(msg) ? msg[0] : String(msg ?? '업로드 실패');
-      // 브라우저에서 S3로 요청이 막히면 "Failed to fetch" → S3 버킷 CORS 설정 필요
+      // 브라우저에서 S3로 요청이 막히면 "Failed to fetch" → 반드시 S3 버킷(백엔드 아님) CORS 설정
       if (msg === 'Failed to fetch' || msg.includes('NetworkError')) {
         msg =
-          'S3 요청이 차단되었습니다. AWS S3 버킷 CORS에 이 사이트 주소를 허용해 주세요. (docs/s3-cors-example.json 참고)';
+          'S3 요청이 차단됨. AWS 콘솔 → S3 → 사용 중인 버킷 → 권한 → CORS에 위 설정을 넣어 주세요. (백엔드 CORS가 아니라 S3 버킷 CORS입니다.)';
       }
       setError(msg);
       setStatus('');
