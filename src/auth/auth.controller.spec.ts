@@ -45,7 +45,7 @@ describe('AuthController', () => {
       jest.spyOn(authService, 'register').mockResolvedValue(result as User);
 
       expect(authController.registerUser(rawToken)).resolves.toEqual(result);
-      expect(authService.register).toHaveBeenCalledWith(rawToken);
+      expect(authService.register).toHaveBeenCalledWith(rawToken, undefined);
     });
   });
 

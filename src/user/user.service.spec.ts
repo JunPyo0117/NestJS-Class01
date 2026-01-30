@@ -89,6 +89,7 @@ describe('UserService', () => {
       expect(mockUserRepository.save).toHaveBeenCalledWith({
         email: createUserDto.email,
         password: hashedPassword,
+        role: 2, // Role.user (default when role not provided)
       });
     });
 
