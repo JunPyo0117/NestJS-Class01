@@ -63,9 +63,9 @@ export default function Register() {
               type="checkbox"
               checked={isAdmin}
               onChange={(e) => setIsAdmin(e.target.checked)}
-              className="rounded border-neutral-600 bg-[var(--color-card)]"
+              className="h-4 w-4 rounded border-2 border-neutral-500 bg-neutral-800 accent-red-600 cursor-pointer"
             />
-            <label htmlFor="isAdmin" className="text-[var(--color-muted)] text-sm cursor-pointer">
+            <label htmlFor="isAdmin" className="text-[#e5e5e5] text-sm cursor-pointer select-none">
               관리자로 가입
             </label>
           </div>
