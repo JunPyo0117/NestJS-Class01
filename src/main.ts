@@ -69,7 +69,8 @@ async function bootstrap() {
         !req.path.startsWith('/api') &&
         !req.path.startsWith('/socket.io') &&
         !req.path.startsWith('/public') &&
-        !req.path.startsWith('/doc')
+        !req.path.startsWith('/doc') &&
+        !req.path.startsWith('/assets')
       ) {
         return res.sendFile(clientPath);
       }
