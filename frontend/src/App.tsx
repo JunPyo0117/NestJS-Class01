@@ -6,6 +6,8 @@ import Register from '@/pages/Register';
 import MovieList from '@/pages/MovieList';
 import MovieDetail from '@/pages/MovieDetail';
 import CreateMovie from '@/pages/CreateMovie';
+import CreateDirector from '@/pages/CreateDirector';
+import CreateGenre from '@/pages/CreateGenre';
 import Chat from '@/pages/Chat';
 import Upload from '@/pages/Upload';
 import { Role } from '@/types';
@@ -38,6 +40,22 @@ function AppRoutes() {
           element={
             <AdminRoute>
               <CreateMovie />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="director/create"
+          element={
+            <AdminRoute>
+              <CreateDirector />
+            </AdminRoute>
+          }
+        />
+        <Route
+          path="genre/create"
+          element={
+            <AdminRoute>
+              <CreateGenre />
             </AdminRoute>
           }
         />

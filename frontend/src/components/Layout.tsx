@@ -27,7 +27,11 @@ export default function Layout() {
                 <Link to="/chat" className="text-[#e5e5e5] no-underline hover:text-[var(--color-accent)] hover:underline">문의 채팅</Link>
                 <Link to="/upload" className="text-[#e5e5e5] no-underline hover:text-[var(--color-accent)] hover:underline">업로드</Link>
                 {user.role === Role.admin && (
-                  <Link to="/movie/create" className="text-[#e5e5e5] no-underline hover:text-[var(--color-accent)] hover:underline">영화 등록</Link>
+                  <>
+                    <Link to="/movie/create" className="text-[#e5e5e5] no-underline hover:text-[var(--color-accent)] hover:underline">영화 등록</Link>
+                    <Link to="/director/create" className="text-[#e5e5e5] no-underline hover:text-[var(--color-accent)] hover:underline">감독 등록</Link>
+                    <Link to="/genre/create" className="text-[#e5e5e5] no-underline hover:text-[var(--color-accent)] hover:underline">장르 등록</Link>
+                  </>
                 )}
                 <span className="text-[var(--color-muted)] text-sm">{user.email}</span>
                 <button
