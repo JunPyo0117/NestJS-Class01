@@ -130,7 +130,7 @@ describe('MovieService', () => {
       ).toHaveBeenCalledWith(qb, dto);
       expect(qb.getManyAndCount).toHaveBeenCalled();
       expect(result).toEqual({
-        data: movies,
+        data: movies.map((m) => ({ ...m, movieFilePath: '' })),
         nextCursor: null,
         hasNextPage: false,
         count: 1,
@@ -191,11 +191,13 @@ describe('MovieService', () => {
             id: 1,
             title: 'Movie 1',
             likeStatus: true,
+            movieFilePath: '',
           },
           {
             id: 3,
             title: 'Movie 3',
             likeStatus: null,
+            movieFilePath: '',
           },
         ],
         nextCursor: null,
@@ -223,7 +225,7 @@ describe('MovieService', () => {
       expect(getMoviesMock).toHaveBeenCalled();
       expect(qb.getManyAndCount).toHaveBeenCalledWith();
       expect(result).toEqual({
-        data: movies,
+        data: movies.map((m) => ({ ...m, movieFilePath: '' })),
         nextCursor: null,
         hasNextPage: false,
         count: 1,
@@ -246,7 +248,11 @@ describe('MovieService', () => {
       const result = await movieService.findOne(1);
 
       expect(findMovieDetailMock).toHaveBeenCalledWith(1);
-      expect(result).toEqual(movie);
+      expect(result).toEqual({
+        ...movie,
+        movieFilePath: '',
+        likeStatus: null,
+      });
     });
 
     it('should throw NotFoundException if movie is not found', async () => {
