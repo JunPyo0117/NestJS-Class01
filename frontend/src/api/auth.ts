@@ -6,10 +6,18 @@ function basicToken(email: string, password: string): string {
   return btoa(`${email}:${password}`);
 }
 
-export async function register(email: string, password: string): Promise<AuthTokens> {
-  const { data } = await api.post<AuthTokens>('/auth/register', undefined, {
-    headers: { Authorization: `Basic ${basicToken(email, password)}` },
-  });
+export async function register(
+  email: string,
+  password: string,
+  role?: number,
+): Promise<AuthTokens> {
+  const { data } = await api.post<AuthTokens>(
+    '/auth/register',
+    role != null ? { role } : undefined,
+    {
+      headers: { Authorization: `Basic ${basicToken(email, password)}` },
+    },
+  );
   return data;
 }
 

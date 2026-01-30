@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsNotEmpty, IsString } from 'class-validator';
+import { IsEmail, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { Role } from '../entity/user.entity';
 
 export class CreateUserDto {
   @IsNotEmpty()
@@ -18,4 +19,13 @@ export class CreateUserDto {
     example: 'password123',
   })
   password: string;
+
+  @IsOptional()
+  @IsEnum(Role)
+  @ApiProperty({
+    description: '역할 (0: admin, 1: paidUser, 2: user). 미입력 시 user',
+    example: 0,
+    required: false,
+  })
+  role?: Role;
 }

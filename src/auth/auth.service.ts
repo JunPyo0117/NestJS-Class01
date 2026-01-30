@@ -119,10 +119,10 @@ export class AuthService {
   }
 
   // rawToken: Basic $token
-  async register(rawToken: string) {
+  async register(rawToken: string, role?: Role) {
     const { email, password } = this.parseBasicToken(rawToken);
 
-    return this.userService.create({ email, password });
+    return this.userService.create({ email, password, role });
   }
 
   async authenticate(email: string, password: string) {

@@ -5,6 +5,7 @@ import { useAuth } from '@/context/AuthContext';
 export default function Register() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
   const [error, setError] = useState('');
   const { register } = useAuth();
   const navigate = useNavigate();
@@ -17,7 +18,7 @@ export default function Register() {
       return;
     }
     try {
-      await register(email.trim(), password);
+      await register(email.trim(), password, isAdmin);
       navigate('/');
     } catch (err: unknown) {
       const msg = err && typeof err === 'object' && 'response' in err
@@ -55,6 +56,18 @@ export default function Register() {
               autoComplete="new-password"
               className="w-full px-3 py-2.5 border border-neutral-700 rounded bg-[var(--color-card)] focus:outline-none focus:border-[var(--color-accent)]"
             />
+          </div>
+          <div className="mb-4 flex items-center gap-2">
+            <input
+              id="isAdmin"
+              type="checkbox"
+              checked={isAdmin}
+              onChange={(e) => setIsAdmin(e.target.checked)}
+              className="rounded border-neutral-600 bg-[var(--color-card)]"
+            />
+            <label htmlFor="isAdmin" className="text-[var(--color-muted)] text-sm cursor-pointer">
+              관리자로 가입
+            </label>
           </div>
           {error && <p className="text-[var(--color-accent)] text-sm mt-1">{error}</p>}
           <button type="submit" className="w-full mt-2 px-4 py-2 rounded bg-[var(--color-accent)] text-white font-semibold hover:bg-[var(--color-accent-hover)] disabled:opacity-60 disabled:cursor-not-allowed">

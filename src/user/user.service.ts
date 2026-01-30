@@ -7,7 +7,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { User } from './entity/user.entity';
+import { Role, User } from './entity/user.entity';
 import * as bcrypt from 'bcrypt';
 import { ConfigService } from '@nestjs/config';
 import { envVariableKeys } from 'src/common/const/env.const';
@@ -44,9 +44,17 @@ export class UserService {
       this.configService.get<number>(envVariableKeys.hashRounds)!,
     );
 
-    // await this.userModel.create({ email, password: hash });
-    // await this.prismaService.user.create({ data: { email, password: hash } });
-    await this.userRepository.save({ email, password: hash });
+    const role =
+      createUserDto.role != null &&
+      [Role.admin, Role.paidUser, Role.user].includes(createUserDto.role)
+        ? createUserDto.role
+        : Role.user;
+
+    await this.userRepository.save({
+      email,
+      password: hash,
+      role,
+    });
 
     // return this.userModel.findOne({ email }).exec();
     // return this.prismaService.user.findUnique({ where: { email } });

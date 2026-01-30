@@ -29,13 +29,16 @@ export class AuthController {
   @Public()
   @ApiBasicAuth()
   @Post('register')
-  @ApiOperation({ description: '사용자 회원가입 (Basic Auth)' })
+  @ApiOperation({ description: '사용자 회원가입 (Basic Auth). body.role: 0=admin, 1=paidUser, 2=user' })
   @ApiResponse({ status: 201, description: '회원가입 성공' })
   @ApiResponse({ status: 400, description: '잘못된 요청 데이터' })
   @ApiResponse({ status: 409, description: '이미 존재하는 이메일' })
-  // authorization: Basic <token>
-  registerUser(@Authorization() token: string) {
-    return this.authService.register(token);
+  // authorization: Basic <token>, body: { role?: number }
+  registerUser(
+    @Authorization() token: string,
+    @Body() body?: { role?: number },
+  ) {
+    return this.authService.register(token, body?.role);
   }
 
   @Public()
