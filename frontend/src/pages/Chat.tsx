@@ -60,6 +60,10 @@ export default function Chat() {
     socket.on('roomCreated', (id: number) => {
       setRoomId(id);
       setSelectedRoomId(id);
+      // 일반 사용자: 백엔드 트랜잭션 커밋 후 히스토리가 보이도록 짧은 지연 후 조회
+      setTimeout(() => {
+        getChatRoomMessages(id).then(setMessages).catch(() => setMessages([]));
+      }, 200);
     });
 
     return () => {
@@ -146,7 +150,9 @@ export default function Chat() {
         className="border border-neutral-600 rounded-lg min-h-[300px] max-h-[400px] overflow-y-auto p-4 my-4 flex flex-col gap-2"
       >
         {effectiveRoomId == null && (
-          <p className="text-muted">채팅방을 선택하거나 메시지를 보내면 채팅방이 생성됩니다.</p>
+          <p className="text-muted">
+            {isAdmin ? '채팅방을 선택하거나 메시지를 보내면 채팅방이 생성됩니다.' : '아래 입력창에 메시지를 적고 전송하면 문의 채팅방이 만들어집니다.'}
+          </p>
         )}
         {effectiveRoomId != null && messages.length === 0 && <p className="text-muted">메시지가 없습니다.</p>}
         {effectiveRoomId != null &&
@@ -179,7 +185,12 @@ export default function Chat() {
           type="text"
           value={input}
           onChange={(e) => setInput(e.target.value)}
-          onKeyDown={(e) => e.key === 'Enter' && send()}
+          onKeyDown={(e) => {
+            if (e.key !== 'Enter') return;
+            if (e.nativeEvent.isComposing) return;
+            e.preventDefault();
+            send();
+          }}
           placeholder="메시지 입력"
           className="flex-1 px-3 py-2 rounded border border-neutral-600 bg-card text-inherit"
           disabled={!connected || (isAdmin && selectedRoomId == null)}
