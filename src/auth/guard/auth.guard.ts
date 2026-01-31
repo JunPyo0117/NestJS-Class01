@@ -2,7 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { Reflector } from '@nestjs/core';
 import { Public } from '../decorator/public.decorator';
-import { RefreshTokenOnly } from '../decorator/refresh-token-only.decorator';
+import { REFRESH_TOKEN_ONLY_KEY } from '../decorator/refresh-token-only.decorator';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
@@ -22,8 +22,8 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
 
     // Refresh Token 전용 라우트 (예: POST /auth/token/access) → type === 'refresh' 허용
-    const isRefreshTokenOnly = this.reflector.get(
-      RefreshTokenOnly,
+    const isRefreshTokenOnly = this.reflector.get<boolean>(
+      REFRESH_TOKEN_ONLY_KEY,
       context.getHandler(),
     );
     if (isRefreshTokenOnly) {
