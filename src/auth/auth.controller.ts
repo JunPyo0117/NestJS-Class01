@@ -19,6 +19,7 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { Authorization } from './decorator/authorization.decorator';
+import { RefreshTokenOnly } from './decorator/refresh-token-only.decorator';
 
 @Controller('auth')
 @ApiBearerAuth()
@@ -66,6 +67,7 @@ export class AuthController {
     return this.authService.tokenBlock(token);
   }
 
+  @RefreshTokenOnly()
   @Post('token/access')
   @ApiOperation({ description: 'Refresh Token으로 새로운 Access Token 발급' })
   @ApiResponse({ status: 201, description: 'Access Token 발급 성공' })
