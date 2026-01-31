@@ -27,14 +27,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     try {
       const u = await authApi.getPrivate();
       setUser(u);
-    } catch (error: any) {
-      // axios interceptor가 refresh를 시도했지만 실패한 경우에만 토큰 삭제
-      // (interceptor에서 이미 토큰을 삭제하고 /login으로 리다이렉트함)
-      // 여기서는 localStorage를 다시 확인해서 토큰이 없으면 user를 null로 설정
-      if (!localStorage.getItem('accessToken')) {
-        setUser(null);
-      }
-      // 토큰이 여전히 있다면 일시적인 네트워크 오류일 수 있으므로 user 상태 유지
+    } catch {
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      setUser(null);
     } finally {
       setLoading(false);
     }

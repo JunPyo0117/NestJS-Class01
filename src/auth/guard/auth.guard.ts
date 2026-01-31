@@ -1,4 +1,9 @@
-import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import {
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { AuthService } from '../auth.service';
 import { Reflector } from '@nestjs/core';
 import { Public } from '../decorator/public.decorator';
@@ -27,12 +32,15 @@ export class AuthGuard implements CanActivate {
       context.getHandler(),
     );
     if (isRefreshTokenOnly) {
-      return !!request.user && request.user.type === 'refresh';
+      if (!request.user || request.user.type !== 'refresh') {
+        throw new UnauthorizedException('유효한 Refresh Token이 필요합니다.');
+      }
+      return true;
     }
 
     // 그 외 라우트는 Access Token만 허용
     if (!request.user || request.user.type !== 'access') {
-      return false;
+      throw new UnauthorizedException('유효한 Access Token이 필요합니다.');
     }
 
     return true;
